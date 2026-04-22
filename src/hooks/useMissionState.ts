@@ -8,6 +8,21 @@ import type { Phase } from '../scenes/ArtemisII/data/phases'
 export type MissionStats = {
   massTonnes: number
   thrustDisplay: string
+  heightMeters: number
+  heightDisplay: string
+}
+
+// Vertical extents of each stage in metres above the engine-bell base (0 m).
+// Numbers mirror the NASA reference guide — SLS Block 1 total height is 98.1 m
+// with LAS attached, dropping to ~84 m after LAS jettison, and so on.
+const STAGE_EXTENTS: Record<string, { top: number; bottom: number }> = {
+  srbL: { top: 54, bottom: 0 },
+  srbR: { top: 54, bottom: 0 },
+  core: { top: 54, bottom: 0 },
+  icps: { top: 68, bottom: 54 },
+  sm: { top: 73, bottom: 68 },
+  crew: { top: 78, bottom: 73 },
+  las: { top: 98.1, bottom: 78 },
 }
 
 export type MissionState = {
@@ -88,5 +103,20 @@ function computeStats(t: number, state: MissionStageState): MissionStats {
         ? `${(thrust * 1000).toFixed(0)} kN`
         : '—'
 
-  return { massTonnes: mass, thrustDisplay }
+  let top = 0
+  let bottom = Infinity
+  for (const id of Object.keys(STAGE_EXTENTS)) {
+    if (state.stages[id as keyof typeof state.stages]?.visible) {
+      top = Math.max(top, STAGE_EXTENTS[id].top)
+      bottom = Math.min(bottom, STAGE_EXTENTS[id].bottom)
+    }
+  }
+  if (!Number.isFinite(bottom)) bottom = 0
+  const heightMeters = Math.max(0, top - bottom)
+  const heightDisplay =
+    heightMeters >= 10
+      ? `${heightMeters.toFixed(1)} m`
+      : `${heightMeters.toFixed(1)} m`
+
+  return { massTonnes: mass, thrustDisplay, heightMeters, heightDisplay }
 }
