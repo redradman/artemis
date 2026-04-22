@@ -1,11 +1,51 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import styles from './Timeline.module.css'
 import { phases } from '../../scenes/ArtemisII/data/phases'
+import type { Phase } from '../../scenes/ArtemisII/data/phases'
 import { useMissionStore } from '../../store/missionStore'
 import { useMissionState } from '../../hooks/useMissionState'
 import type { PlaybackSpeed } from '../../store/missionStore'
 
 const SPEEDS: readonly PlaybackSpeed[] = [1, 2, 5] as const
+
+// Adjacent labels closer than this fraction of the track width get anchored
+// to opposite edges of their tick column to avoid horizontal overlap.
+const PROXIMITY_THRESHOLD = 0.05
+
+type LabelAnchor = 'left' | 'center' | 'right'
+
+type LabelLayout = { anchor: LabelAnchor; stackUp: boolean; hideSub: boolean }
+
+function computeLabelLayouts(
+  phases: readonly { t: number; tier: 'major' | 'minor' }[],
+  threshold = PROXIMITY_THRESHOLD,
+): LabelLayout[] {
+  const layouts: LabelLayout[] = phases.map(() => ({
+    anchor: 'center',
+    stackUp: false,
+    hideSub: false,
+  }))
+  for (let i = 1; i < phases.length; i++) {
+    const gap = phases[i].t - phases[i - 1].t
+    if (gap < threshold) {
+      // Only resolve when both phases share the same tier (above or below the
+      // baseline). Mixed-tier neighbours already sit on opposite rows.
+      const sameTier = phases[i].tier === phases[i - 1].tier
+      if (!sameTier) continue
+      // Predecessor keeps the normal row; successor jumps up one row. Both
+      // suppress their T+ sublabel to keep each group short enough to fit
+      // cleanly into the track without the two groups vertically overlapping.
+      // Anchor both to the right edge of their tick — the later phase is
+      // typically the final tick pinned to 100% which would otherwise overflow.
+      layouts[i - 1].anchor = 'right'
+      layouts[i - 1].hideSub = true
+      layouts[i].anchor = 'right'
+      layouts[i].stackUp = true
+      layouts[i].hideSub = true
+    }
+  }
+  return layouts
+}
 
 export function Timeline() {
   const currentT = useMissionStore((s) => s.currentT)
@@ -17,9 +57,13 @@ export function Timeline() {
 
   const { activePhase, activePhaseIndex, tplus } = useMissionState()
   const next = phases[activePhaseIndex + 1]
+  const labelLayouts = computeLabelLayouts(phases)
 
   const trackRef = useRef<HTMLDivElement>(null)
   const scrubbingRef = useRef(false)
+  const [openPhaseId, setOpenPhaseId] = useState<string | null>(null)
+  const popoverRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const iconRefs = useRef<Record<string, HTMLButtonElement | null>>({})
 
   const scrubFromClientX = useCallback(
     (clientX: number) => {
@@ -57,6 +101,35 @@ export function Timeline() {
     }
   }, [scrubFromClientX])
 
+  // Close popover on outside click or Escape
+  useEffect(() => {
+    if (!openPhaseId) return
+    const onMouseDown = (e: MouseEvent) => {
+      const target = e.target as Node | null
+      if (!target) return
+      const popover = popoverRefs.current[openPhaseId]
+      const icon = iconRefs.current[openPhaseId]
+      if (popover && popover.contains(target)) return
+      if (icon && icon.contains(target)) return
+      setOpenPhaseId(null)
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpenPhaseId(null)
+    }
+    document.addEventListener('mousedown', onMouseDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onMouseDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [openPhaseId])
+
+  const popoverAnchorClass = (t: number) => {
+    if (t < 0.1) return styles.popoverAnchorLeft
+    if (t > 0.9) return styles.popoverAnchorRight
+    return ''
+  }
+
   return (
     <div className={styles.wrap}>
       <div className={styles.head}>
@@ -73,20 +146,23 @@ export function Timeline() {
           <button type="button" className={styles.playBtn} onClick={togglePlay}>
             {isPlaying ? '❚❚ PAUSE' : '▶ PLAY'}
           </button>
-          {SPEEDS.map((s) => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => setSpeed(s)}
-              className={
-                s === playbackSpeed
-                  ? `${styles.speedBtn} ${styles.speedBtnActive}`
-                  : styles.speedBtn
-              }
-            >
-              {s}×
-            </button>
-          ))}
+          <span className={styles.divider} aria-hidden="true" />
+          <div className={styles.speedGroup}>
+            {SPEEDS.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setSpeed(s)}
+                className={
+                  s === playbackSpeed
+                    ? `${styles.speedBtn} ${styles.speedBtnActive}`
+                    : styles.speedBtn
+                }
+              >
+                {s}×
+              </button>
+            ))}
+          </div>
           <div className={styles.phasePill}>▸ {activePhase.label}</div>
         </div>
       </div>
@@ -114,6 +190,8 @@ export function Timeline() {
           const isCurrent = i === activePhaseIndex
           const isMajor = p.tier === 'major'
           const above = isMajor
+          const layout = labelLayouts[i]
+          const anchor = layout.anchor
 
           const tickClasses = [
             styles.tick,
@@ -134,6 +212,26 @@ export function Timeline() {
             .filter(Boolean)
             .join(' ')
 
+          const anchorClass =
+            anchor === 'left'
+              ? styles.labelGroupAnchorLeft
+              : anchor === 'right'
+                ? styles.labelGroupAnchorRight
+                : ''
+
+          const labelGroupClasses = [
+            styles.labelGroup,
+            above ? styles.labelGroupAbove : styles.labelGroupBelow,
+            anchorClass,
+            layout.stackUp && above ? styles.labelGroupStackUp : null,
+          ]
+            .filter(Boolean)
+            .join(' ')
+
+          const isOpen = openPhaseId === p.id
+          const popoverId = `phase-popover-${p.id}`
+          const popoverTitleId = `phase-popover-title-${p.id}`
+
           return (
             <div
               key={p.id}
@@ -146,15 +244,28 @@ export function Timeline() {
               onMouseDown={(e) => e.stopPropagation()}
             >
               <div className={tickClasses} />
-              <div
-                className={
-                  above
-                    ? `${styles.labelGroup} ${styles.labelGroupAbove}`
-                    : `${styles.labelGroup} ${styles.labelGroupBelow}`
-                }
-              >
-                <div className={labelClasses}>{p.label}</div>
-                {isMajor && (
+              <div className={labelGroupClasses}>
+                <div className={styles.labelRow}>
+                  <div className={labelClasses}>{p.label}</div>
+                  <button
+                    ref={(el) => {
+                      iconRefs.current[p.id] = el
+                    }}
+                    type="button"
+                    className={`${styles.infoIcon} ${isMajor ? styles.infoIconMajor : styles.infoIconMinor}`}
+                    aria-label={`${p.label} details`}
+                    aria-expanded={isOpen}
+                    aria-controls={popoverId}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setOpenPhaseId((prev) => (prev === p.id ? null : p.id))
+                    }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                  >
+                    i
+                  </button>
+                </div>
+                {isMajor && !layout.hideSub && (
                   <div
                     className={
                       isCurrent ? `${styles.labelSub} ${styles.labelSubCurrent}` : styles.labelSub
@@ -164,11 +275,91 @@ export function Timeline() {
                   </div>
                 )}
               </div>
+              {isOpen && (
+                <PhaseInfoPopover
+                  id={popoverId}
+                  titleId={popoverTitleId}
+                  phase={p}
+                  anchorClass={popoverAnchorClass(p.t)}
+                  popoverRef={(el) => {
+                    popoverRefs.current[p.id] = el
+                  }}
+                  onClose={() => setOpenPhaseId(null)}
+                />
+              )}
             </div>
           )
         })}
 
         <div className={styles.playhead} style={{ left: `${currentT * 100}%` }} />
+      </div>
+    </div>
+  )
+}
+
+type PhaseInfoPopoverProps = {
+  id: string
+  titleId: string
+  phase: Phase
+  anchorClass: string
+  popoverRef: (el: HTMLDivElement | null) => void
+  onClose: () => void
+}
+
+function PhaseInfoPopover({
+  id,
+  titleId,
+  phase,
+  anchorClass,
+  popoverRef,
+  onClose,
+}: PhaseInfoPopoverProps) {
+  return (
+    <div
+      ref={popoverRef}
+      id={id}
+      role="dialog"
+      aria-modal="false"
+      aria-labelledby={titleId}
+      className={`${styles.popover} ${anchorClass}`}
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
+      <div className={styles.popoverHead}>
+        <div className={styles.popoverTitle} id={titleId}>
+          {phase.label}
+        </div>
+        <button
+          type="button"
+          className={styles.popoverClose}
+          aria-label="Close"
+          onClick={onClose}
+        >
+          ×
+        </button>
+      </div>
+      <div className={styles.popoverMeta}>
+        T+ {phase.tplus} <span className={styles.popoverMetaDot}>·</span>{' '}
+        {phase.tier.toUpperCase()}
+      </div>
+      <div className={styles.popoverDivider} />
+      <div className={styles.popoverSection}>
+        <div className={styles.popoverSectionLabel}>SIGNIFICANCE</div>
+        <div className={styles.popoverBody}>{phase.significance}</div>
+      </div>
+      <div className={styles.popoverSection}>
+        <div className={styles.popoverSectionLabel}>DESCRIPTION</div>
+        <div className={`${styles.popoverBody} ${styles.popoverBodyProse}`}>{phase.desc}</div>
+      </div>
+      <div className={styles.popoverSection}>
+        <div className={styles.popoverSectionLabel}>SOURCES</div>
+        <ul className={styles.popoverSources}>
+          {phase.sources.map((s, i) => (
+            <li key={i} className={styles.popoverSource}>
+              {s}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   )

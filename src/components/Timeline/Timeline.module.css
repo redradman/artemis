@@ -2,10 +2,12 @@
   position: absolute;
   left: var(--edge-inset);
   right: var(--edge-inset);
-  bottom: 26px;
+  bottom: var(--timeline-bottom);
   border: var(--hairline);
-  padding: 14px 20px 18px;
-  background: var(--color-bg);
+  padding: 16px 22px 18px;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(var(--panel-blur));
+  -webkit-backdrop-filter: blur(var(--panel-blur));
   z-index: 5;
 }
 
@@ -13,22 +15,32 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  gap: 18px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
 }
 
 .status {
   font-size: var(--text-10);
   letter-spacing: var(--tracking-04);
-  color: var(--color-fg-muted);
+  font-weight: var(--weight-medium);
+  color: var(--color-fg);
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .statusValue {
   color: var(--color-fg);
+  font-weight: var(--weight-semibold);
 }
 
 .statusNext {
-  margin-left: 16px;
-  color: var(--color-fg-dim);
+  margin-left: 14px;
+  font-size: var(--text-9);
+  font-weight: var(--weight-regular);
+  color: var(--color-fg-muted);
+  opacity: 0.55;
+  white-space: nowrap;
 }
 
 .statusNextValue {
@@ -39,17 +51,53 @@
   display: flex;
   gap: 6px;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
-.playBtn {
+.playBtn,
+.speedBtn {
   background: transparent;
   color: var(--color-fg);
   border: var(--hairline);
   font-family: var(--font-mono);
   font-size: var(--text-9);
-  letter-spacing: var(--tracking-05);
-  padding: 5px 12px;
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-04);
+  padding: 6px 10px;
   cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+
+.playBtn:hover,
+.speedBtn:hover {
+  border-color: var(--color-fg);
+}
+
+.speedBtnActive {
+  background: var(--color-fg);
+  color: var(--color-bg);
+  border-color: var(--color-fg);
+}
+
+.playBtn {
+  padding: 6px 14px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-05);
+}
+
+.speedGroup {
+  display: flex;
+  gap: 4px;
+}
+
+.speedBtn {
+  padding: 6px 9px;
+  letter-spacing: var(--tracking-02);
 }
 
 .playBtn:focus,
@@ -63,37 +111,29 @@
   outline-offset: 2px;
 }
 
-.speedBtn {
-  background: transparent;
-  color: var(--color-fg);
-  border: var(--hairline);
-  font-family: var(--font-mono);
-  font-size: var(--text-9);
-  letter-spacing: var(--tracking-01);
-  padding: 5px 8px;
-  cursor: pointer;
-}
-
-.speedBtnActive {
-  background: var(--color-fg);
-  color: var(--color-bg);
-  border-color: var(--color-fg);
+.divider {
+  width: 1px;
+  height: 22px;
+  background: var(--color-fg-dim);
+  opacity: 0.5;
+  margin: 0 4px;
+  display: inline-block;
 }
 
 .phasePill {
-  margin-left: 10px;
+  margin-left: 8px;
   font-size: var(--text-11);
-  letter-spacing: var(--tracking-06);
+  letter-spacing: var(--tracking-05);
   font-weight: var(--weight-semibold);
   color: var(--color-accent);
-  padding: 4px 10px;
+  padding: 5px 12px;
   border: var(--hairline-accent);
   background: var(--color-accent-wash);
 }
 
 .track {
   position: relative;
-  height: 88px;
+  height: 92px;
   margin-top: 4px;
 }
 
@@ -101,20 +141,21 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: 44px;
+  top: 46px;
   height: 1px;
   background: var(--color-fg-dim);
-  opacity: 0.75;
+  opacity: 0.8;
 }
 
 .progress {
   position: absolute;
   left: 0;
-  top: 43px;
-  height: 3px;
+  top: 45px;
+  height: 2px;
   background: linear-gradient(to right, var(--color-accent-dim), var(--color-accent));
-  box-shadow: 0 0 8px var(--color-accent-glow);
-  opacity: 0.9;
+  box-shadow: 0 0 4px var(--color-accent-glow);
+  opacity: 0.6;
+  z-index: 1;
 }
 
 .tickCol {
@@ -133,13 +174,13 @@
   width: 1px;
   height: 8px;
   background: var(--color-fg-dim);
-  opacity: 0.5;
+  opacity: 0.55;
 }
 
 .tickMajor {
   width: 2px;
   height: 14px;
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
 .tickPast {
@@ -153,11 +194,11 @@
 }
 
 .tickAbove {
-  top: 32px;
+  top: 34px;
 }
 
 .tickBelow {
-  top: 44px;
+  top: 46px;
 }
 
 .labelGroup {
@@ -167,16 +208,42 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
   pointer-events: none;
 }
 
+.labelRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  pointer-events: auto;
+}
+
 .labelGroupAbove {
-  bottom: 56px;
+  bottom: 58px;
 }
 
 .labelGroupBelow {
-  top: 56px;
+  top: 58px;
+}
+
+.labelGroupAnchorLeft {
+  transform: translateX(0%);
+  align-items: flex-start;
+}
+
+.labelGroupAnchorRight {
+  transform: translateX(-100%);
+  align-items: flex-end;
+}
+
+/* When two adjacent same-tier majors would collide horizontally, the later one
+ * stacks one row above while the earlier one stays on the normal row. Both
+ * groups hide their T+ sublabel (see JSX) so each is a single line, letting
+ * the stacked pair fit the track vertically. */
+.labelGroupStackUp {
+  bottom: 78px;
 }
 
 .label {
@@ -188,22 +255,22 @@
   font-size: var(--text-10);
   letter-spacing: var(--tracking-05);
   font-weight: var(--weight-semibold);
-  opacity: 0.65;
+  opacity: 0.75;
 }
 
 .labelMajorPast {
-  opacity: 0.95;
+  opacity: 0.98;
 }
 
 .labelMinor {
-  font-size: var(--text-8);
+  font-size: var(--text-9);
   letter-spacing: var(--tracking-02);
-  font-weight: var(--weight-regular);
-  opacity: 0.35;
+  font-weight: var(--weight-medium);
+  opacity: 0.6;
 }
 
 .labelMinorPast {
-  opacity: 0.55;
+  opacity: 0.75;
 }
 
 .labelCurrent {
@@ -212,21 +279,206 @@
 }
 
 .labelSub {
-  font-size: var(--text-7);
+  font-size: var(--text-9);
   letter-spacing: var(--tracking-03);
   white-space: nowrap;
   color: var(--color-fg);
-  opacity: 0.4;
+  font-weight: var(--weight-medium);
+  opacity: 0.85;
 }
 
 .labelSubCurrent {
   color: var(--color-accent);
-  opacity: 0.9;
+  opacity: 1;
+}
+
+.infoIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid var(--color-fg-dim);
+  background: transparent;
+  color: var(--color-fg);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.7;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    opacity 0.15s;
+  pointer-events: auto;
+  flex: 0 0 auto;
+}
+
+.infoIcon:hover {
+  border-color: var(--color-fg);
+  background: var(--color-accent-wash);
+  opacity: 1;
+}
+
+.infoIcon:focus {
+  outline: none;
+}
+
+.infoIcon:focus-visible {
+  outline: 1px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.popover {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 10px;
+  width: clamp(260px, 28vw, 360px);
+  max-height: 40vh;
+  overflow-y: auto;
+  padding: 18px;
+  background: rgba(0, 0, 0, 0.88);
+  border: 1px solid var(--color-fg);
+  backdrop-filter: blur(var(--panel-blur));
+  -webkit-backdrop-filter: blur(var(--panel-blur));
+  z-index: 20;
+  pointer-events: auto;
+  cursor: default;
+  text-align: left;
+}
+
+.popoverAnchorLeft {
+  left: 0;
+  transform: translateX(0);
+}
+
+.popoverAnchorRight {
+  left: auto;
+  right: 0;
+  transform: translateX(0);
+}
+
+.popoverHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.popoverTitle {
+  font-size: var(--text-11);
+  letter-spacing: var(--tracking-05);
+  font-weight: var(--weight-semibold);
+  color: var(--color-accent);
+  text-transform: uppercase;
+}
+
+.popoverClose {
+  background: transparent;
+  border: none;
+  color: var(--color-fg-muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  margin: -2px -4px 0 0;
+  font-family: var(--font-mono);
+  transition: color 0.15s;
+}
+
+.popoverClose:hover {
+  color: var(--color-fg);
+}
+
+.popoverClose:focus {
+  outline: none;
+}
+
+.popoverClose:focus-visible {
+  outline: 1px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.popoverMeta {
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: var(--text-9);
+  letter-spacing: var(--tracking-03);
+  color: var(--color-fg-muted);
+  opacity: 0.75;
+}
+
+.popoverMetaDot {
+  margin: 0 4px;
+  opacity: 0.6;
+}
+
+.popoverDivider {
+  margin: 12px 0;
+  height: 1px;
+  background: var(--color-fg-dim);
+  opacity: 0.5;
+}
+
+.popoverSection {
+  margin-bottom: 12px;
+}
+
+.popoverSection:last-child {
+  margin-bottom: 0;
+}
+
+.popoverSectionLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-9);
+  letter-spacing: var(--tracking-04);
+  font-weight: var(--weight-medium);
+  color: var(--color-accent);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.popoverBody {
+  font-size: var(--text-11);
+  line-height: 1.5;
+  color: var(--color-fg);
+}
+
+.popoverBodyProse {
+  font-family: 'Inter', ui-sans-serif, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  line-height: 1.6;
+}
+
+.popoverSources {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.popoverSource {
+  font-family: var(--font-mono);
+  font-size: var(--text-9);
+  color: var(--color-fg-muted);
+  opacity: 0.8;
+  padding: 2px 0 2px 14px;
+  position: relative;
+}
+
+.popoverSource::before {
+  content: '•';
+  position: absolute;
+  left: 2px;
+  color: var(--color-fg-dim);
 }
 
 .playhead {
   position: absolute;
-  top: 38px;
+  top: 39px;
   transform: translateX(-50%) rotate(45deg);
   width: 14px;
   height: 14px;
@@ -238,19 +490,14 @@
   z-index: 2;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .wrap {
-    left: 12px;
-    right: 12px;
-    bottom: 12px;
-    padding: 10px 12px 12px;
+    padding: 12px 14px 14px;
   }
 
   .head {
-    flex-direction: column;
-    align-items: stretch;
     gap: 10px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
 
   .statusNext {
@@ -258,25 +505,43 @@
   }
 
   .controls {
-    justify-content: flex-start;
     flex-wrap: wrap;
+    justify-content: flex-end;
   }
 
   .phasePill {
     margin-left: auto;
   }
+}
 
+@media (max-width: 1340px) {
+  .labelMinor {
+    display: none;
+  }
+
+  /* Hide the info icon next to minor phases when their labels are suppressed
+   * so we don't leave a floating 'i' without its phase name for context. */
+  .infoIconMinor {
+    display: none;
+  }
+
+  .tick:not(.tickMajor) {
+    opacity: 0.3;
+  }
+}
+
+@media (max-width: 640px) {
   .track {
-    height: 28px;
+    height: 32px;
     margin-top: 2px;
   }
 
   .baseline {
-    top: 14px;
+    top: 16px;
   }
 
   .progress {
-    top: 13px;
+    top: 15px;
   }
 
   .tickCol {
@@ -284,6 +549,6 @@
   }
 
   .playhead {
-    top: 8px;
+    top: 10px;
   }
 }
