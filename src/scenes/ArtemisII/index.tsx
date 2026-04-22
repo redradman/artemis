@@ -5,13 +5,23 @@ import { OrbitControls } from '@react-three/drei'
 import { Rocket } from './Rocket'
 import { Projector } from '../../hooks/useProjectedPoints'
 import { components } from './data/components'
+import { useMissionState } from '../../hooks/useMissionState'
+import { useMissionStore } from '../../store/missionStore'
 
 export function ArtemisIIScene() {
   const rocketRef = useRef<THREE.Group>(null)
-  const targets = useMemo(
-    () => components.map((c) => ({ id: c.id, point: c.anchor })),
-    [],
-  )
+  const { state } = useMissionState()
+  const autoRotate = useMissionStore((s) => s.autoRotate)
+
+  const targets = useMemo(() => {
+    return components.map((c) => {
+      const stageOffset = state.stages[c.stage]
+      const point = c.anchor
+        .clone()
+        .add(new THREE.Vector3(stageOffset.offsetX, stageOffset.offsetY, stageOffset.offsetZ))
+      return { id: c.id, point }
+    })
+  }, [state])
 
   return (
     <Canvas
@@ -34,6 +44,8 @@ export function ArtemisIIScene() {
         minDistance={15}
         maxDistance={400}
         target={[0, 1.5, 0]}
+        autoRotate={autoRotate}
+        autoRotateSpeed={0.6}
       />
     </Canvas>
   )

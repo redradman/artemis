@@ -12,9 +12,10 @@ const WING_ANGLES = [
 
 type SolarWingProps = {
   angle: number
+  deploy: number
 }
 
-function SolarWing({ angle }: SolarWingProps) {
+function SolarWing({ angle, deploy }: SolarWingProps) {
   const geoms = useMemo(() => {
     const decorationPoints: THREE.Vector3[] = []
     for (let j = 0; j < 5; j++) {
@@ -34,22 +35,30 @@ function SolarWing({ angle }: SolarWingProps) {
     }
   }, [])
 
+  const scaleZ = 0.2 + deploy * 0.8
+
   return (
     <group position={[0, 50.3, 0]} rotation={[0, angle, 0]}>
-      <group position={[0, 0, 1.5]}>
-        <Wire geometry={geoms.arm} dense={false} />
-      </group>
-      {[0, 1, 2].map((i) => (
-        <group key={i} position={[0, 0, 0.9 + i * 2]}>
-          <Wire geometry={geoms.panel} />
-          <lineSegments geometry={geoms.decoration} material={wireMesh} />
+      <group scale={[1, 1, scaleZ]}>
+        <group position={[0, 0, 1.5]}>
+          <Wire geometry={geoms.arm} dense={false} />
         </group>
-      ))}
+        {[0, 1, 2].map((i) => (
+          <group key={i} position={[0, 0, 0.9 + i * 2]}>
+            <Wire geometry={geoms.panel} />
+            <lineSegments geometry={geoms.decoration} material={wireMesh} />
+          </group>
+        ))}
+      </group>
     </group>
   )
 }
 
-export function ServiceModule() {
+type ServiceModuleProps = {
+  solarDeploy?: number
+}
+
+export function ServiceModule({ solarDeploy = 0 }: ServiceModuleProps) {
   const geoms = useMemo(
     () => ({
       body: new THREE.CylinderGeometry(2.3, 2.3, 4, 24, 4, false),
@@ -67,7 +76,7 @@ export function ServiceModule() {
         <Wire geometry={geoms.engine} />
       </group>
       {WING_ANGLES.map((angle, i) => (
-        <SolarWing key={i} angle={angle} />
+        <SolarWing key={i} angle={angle} deploy={solarDeploy} />
       ))}
     </group>
   )
