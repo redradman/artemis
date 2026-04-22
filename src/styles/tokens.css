@@ -9,6 +9,9 @@
   --color-wire-dim: rgba(240, 235, 224, 0.35);
   --color-wire-faint: rgba(240, 235, 224, 0.12);
 
+  --line: rgba(240, 235, 224, 0.4);
+  --line-strong: rgba(240, 235, 224, 0.9);
+
   --color-accent: #e8a23b;
   --color-accent-dim: rgba(232, 162, 59, 0.55);
   --color-accent-wash: rgba(232, 162, 59, 0.09);
