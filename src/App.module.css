@@ -87,10 +87,11 @@
 }
 
 /* Unobtrusive author credit. Sits in the bottom-right strip below the
- * timeline wrap so it doesn't compete with the main HUD. */
+ * timeline wrap so it doesn't compete with the main HUD. The 8px offset
+ * clears the --timeline-bottom gap (28-40px) with room for the text. */
 .credit {
   position: absolute;
-  bottom: 4px;
+  bottom: 8px;
   right: var(--edge-inset);
   font-family: var(--font-mono);
   font-size: var(--text-8);
