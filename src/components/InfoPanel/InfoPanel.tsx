@@ -6,6 +6,19 @@ import {
   type RocketComponent,
 } from '../../scenes/ArtemisII/data/components'
 
+/**
+ * Split the first sentence off a purpose paragraph so we can render it as an
+ * accent pull-quote above the body prose. Falls back to the whole string as
+ * the lede when no sentence break is found.
+ */
+function splitPurpose(text: string): { lede: string; body: string | null } {
+  const match = text.match(/^(.+?[.!?])(\s+)(.+)$/s)
+  if (match) {
+    return { lede: match[1], body: match[3] }
+  }
+  return { lede: text, body: null }
+}
+
 export function InfoPanel() {
   const activeId = useMissionStore((s) => s.activeComponent)
   const clear = useMissionStore((s) => s.setActiveComponent)
@@ -27,17 +40,18 @@ export function InfoPanel() {
       ) as Array<[string, string]>)
     : []
 
+  const purpose = displayed ? splitPurpose(displayed.info.purpose) : null
+
   return (
     <aside
       className={isOpen ? `${styles.panel} ${styles.open}` : styles.panel}
       aria-hidden={!isOpen}
+      aria-labelledby={displayed ? `info-panel-${displayed.id}` : undefined}
     >
       {displayed && (
         <>
           <div className={styles.header}>
-            <div className={styles.short}>
-              {displayed.kicker} · {displayed.short}
-            </div>
+            <div className={styles.kicker}>{displayed.kicker}</div>
             <button
               type="button"
               className={styles.close}
@@ -47,20 +61,25 @@ export function InfoPanel() {
               ×
             </button>
           </div>
-          <div className={styles.name}>{displayed.label}</div>
-          <div className={styles.purpose}>{displayed.info.purpose}</div>
+          <h2 id={`info-panel-${displayed.id}`} className={styles.name}>
+            {displayed.label}
+          </h2>
+          {purpose && (
+            <blockquote className={styles.lede}>{purpose.lede}</blockquote>
+          )}
+          {purpose?.body && <p className={styles.body}>{purpose.body}</p>}
           {specs.length > 0 && (
-            <div className={styles.rows}>
+            <dl className={styles.rows}>
               {specs.map(([k, v]) => (
                 <div key={k} className={styles.row}>
-                  <span className={styles.rowKey}>{k}</span>
-                  <span className={styles.rowValue}>{v}</span>
+                  <dt className={styles.rowKey}>{k}</dt>
+                  <dd className={styles.rowValue}>{v}</dd>
                 </div>
               ))}
-            </div>
+            </dl>
           )}
           {displayed.info.notes && (
-            <div className={styles.notes}>{displayed.info.notes}</div>
+            <p className={styles.notes}>{displayed.info.notes}</p>
           )}
         </>
       )}
