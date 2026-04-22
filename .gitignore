@@ -28,5 +28,7 @@ dist-ssr
 *.sln
 *.sw?
 
+# Screenshots / image captures
+*.png
 
 docs/design/*
