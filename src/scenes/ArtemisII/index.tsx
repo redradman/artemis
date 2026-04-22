@@ -1,8 +1,18 @@
+import { useMemo, useRef } from 'react'
+import * as THREE from 'three'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { Rocket } from './Rocket'
+import { Projector } from '../../hooks/useProjectedPoints'
+import { components } from './data/components'
 
 export function ArtemisIIScene() {
+  const rocketRef = useRef<THREE.Group>(null)
+  const targets = useMemo(
+    () => components.map((c) => ({ id: c.id, point: c.anchor })),
+    [],
+  )
+
   return (
     <Canvas
       gl={{ antialias: true, alpha: true }}
@@ -16,7 +26,8 @@ export function ArtemisIIScene() {
     >
       <fog attach="fog" args={[0x000000, 80, 260]} />
       <ambientLight intensity={1} />
-      <Rocket />
+      <Rocket ref={rocketRef} />
+      <Projector targets={targets} parentRef={rocketRef} />
       <OrbitControls
         enableDamping
         dampingFactor={0.08}
