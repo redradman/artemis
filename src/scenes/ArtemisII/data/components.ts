@@ -48,7 +48,7 @@ export const components: RocketComponent[] = [
     focus: new THREE.Vector3(0, 62, 0),
     focusRadius: 30,
     side: 'right',
-    offset: { x: 0, y: -100 },
+    offset: { x: 0, y: -20 },
     stage: 'las',
   },
   // Source: Reference Guide p.98 (Abort Motor); Quick Facts p.127
@@ -70,7 +70,7 @@ export const components: RocketComponent[] = [
     focus: new THREE.Vector3(0, 59, 0),
     focusRadius: 20,
     side: 'right',
-    offset: { x: 140, y: -20 },
+    offset: { x: 0, y: -5 },
     stage: 'las',
   },
   // Source: Reference Guide p.78 (Crew Module); Quick Facts p.128
@@ -92,7 +92,7 @@ export const components: RocketComponent[] = [
     focus: new THREE.Vector3(0, 54, 0),
     focusRadius: 25,
     side: 'left',
-    offset: { x: -180, y: -40 },
+    offset: { x: 0, y: -15 },
     stage: 'crew',
   },
   // Source: Reference Guide p.80 (Heat Shield) and p.79 (re-entry temperatures)
@@ -114,7 +114,7 @@ export const components: RocketComponent[] = [
     focus: new THREE.Vector3(0, 52, 0),
     focusRadius: 22,
     side: 'left',
-    offset: { x: -180, y: 20 },
+    offset: { x: 0, y: 10 },
     stage: 'crew',
   },
   // Source: Reference Guide p.96 (service module power) and Quick Facts p.128
@@ -132,11 +132,15 @@ export const components: RocketComponent[] = [
       power: '11 kW',
       panels: '3 per wing',
     },
-    anchor: new THREE.Vector3(6.5, 50.3, 6.5),
-    focus: new THREE.Vector3(4, 50, 4),
-    focusRadius: 30,
+    // Anchor sits on the service-module body edge at the +x/+z wing-root
+    // quadrant (radius ~2.3), so the leader lands on solid SM geometry
+    // regardless of solarDeploy state (wing panels scale in/out, the SM
+    // barrel does not).
+    anchor: new THREE.Vector3(1.6, 50.3, 1.6),
+    focus: new THREE.Vector3(0, 50, 0),
+    focusRadius: 28,
     side: 'right',
-    offset: { x: 160, y: -30 },
+    offset: { x: 0, y: -15 },
     stage: 'sm',
   },
   // Source: Reference Guide pp.94–95 (European Service Module); Quick Facts p.128
@@ -158,7 +162,7 @@ export const components: RocketComponent[] = [
     focus: new THREE.Vector3(0, 50, 0),
     focusRadius: 25,
     side: 'right',
-    offset: { x: 170, y: 30 },
+    offset: { x: 0, y: 15 },
     stage: 'sm',
   },
   // Source: Reference Guide p.51 (ICPS) and SLS Block 1 by the Numbers p.70
@@ -180,7 +184,7 @@ export const components: RocketComponent[] = [
     focus: new THREE.Vector3(0, 44, 0),
     focusRadius: 28,
     side: 'right',
-    offset: { x: 170, y: 0 },
+    offset: { x: 0, y: 0 },
     stage: 'icps',
   },
   // Source: Reference Guide p.41 (Core Stage) and SLS Block 1 by the Numbers p.69
@@ -202,7 +206,7 @@ export const components: RocketComponent[] = [
     focus: new THREE.Vector3(0, 21, 0),
     focusRadius: 55,
     side: 'left',
-    offset: { x: -180, y: -10 },
+    offset: { x: 0, y: -5 },
     stage: 'core',
   },
   // Source: Reference Guide p.43 (Intertank)
@@ -223,7 +227,7 @@ export const components: RocketComponent[] = [
     focus: new THREE.Vector3(0, 24, 0),
     focusRadius: 30,
     side: 'right',
-    offset: { x: 170, y: 10 },
+    offset: { x: 0, y: 5 },
     stage: 'core',
   },
   // Source: Reference Guide p.43 (Liquid Hydrogen Fuel Tank) and p.46 (LH2 temperature)
@@ -245,7 +249,7 @@ export const components: RocketComponent[] = [
     focus: new THREE.Vector3(0, 12, 0),
     focusRadius: 45,
     side: 'left',
-    offset: { x: -170, y: 20 },
+    offset: { x: 0, y: 10 },
     stage: 'core',
   },
   // Source: Reference Guide p.48 (Solid Rocket Boosters) and SLS Block 1 by the Numbers p.70
@@ -267,7 +271,7 @@ export const components: RocketComponent[] = [
     focus: new THREE.Vector3(6, 22, 0),
     focusRadius: 45,
     side: 'right',
-    offset: { x: 150, y: 0 },
+    offset: { x: 0, y: 0 },
     stage: 'srbR',
   },
   // Source: Reference Guide p.50 (Motor Assembly) and p.57 (booster manufacturing)
@@ -288,7 +292,7 @@ export const components: RocketComponent[] = [
     focus: new THREE.Vector3(-6, 12, 0),
     focusRadius: 25,
     side: 'left',
-    offset: { x: -160, y: 30 },
+    offset: { x: 0, y: 15 },
     stage: 'srbL',
   },
   // Source: Reference Guide pp.45–47 (RS-25 Engine) and SLS Block 1 by the Numbers p.69
@@ -310,7 +314,7 @@ export const components: RocketComponent[] = [
     focus: new THREE.Vector3(0, -4, 0),
     focusRadius: 20,
     side: 'right',
-    offset: { x: 180, y: 50 },
+    offset: { x: 0, y: 0 },
     stage: 'core',
   },
   // Source: Reference Guide p.50 (Aft Assembly) and Quick Facts p.35 (vehicle support posts)
@@ -331,7 +335,7 @@ export const components: RocketComponent[] = [
     focus: new THREE.Vector3(-6, 0, 0),
     focusRadius: 15,
     side: 'left',
-    offset: { x: -170, y: 40 },
+    offset: { x: 0, y: 20 },
     stage: 'srbL',
   },
 ]
