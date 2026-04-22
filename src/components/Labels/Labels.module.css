@@ -7,6 +7,13 @@
   z-index: 2;
 }
 
+@media (max-width: 1200px) {
+  .text {
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+  }
+}
+
 @media (max-width: 768px) {
   .overlay {
     display: none;
@@ -36,43 +43,31 @@
   cursor: pointer;
 }
 
-.dotHit {
-  fill: transparent;
-  pointer-events: all;
-  cursor: pointer;
-}
-
 .leader {
   stroke: var(--line);
-  stroke-width: 0.5;
+  stroke-width: 0.75;
   fill: none;
   transition: stroke 0.25s;
 }
 
-.tick {
-  stroke: var(--line);
-  stroke-width: 0.5;
-  transition: stroke 0.25s;
-}
-
 .dot {
-  fill: var(--line-strong);
+  fill: var(--color-fg);
+  fill-opacity: 1;
   transition: fill 0.25s, r 0.25s;
 }
 
 .text {
   font-family: var(--font-mono);
-  font-size: var(--text-10);
-  font-weight: var(--weight-regular);
-  letter-spacing: var(--tracking-01);
+  font-size: var(--text-11);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-02);
   fill: var(--line-strong);
   text-transform: uppercase;
   transition: fill 0.25s;
   user-select: none;
 }
 
-.group:hover .leader,
-.group:hover .tick {
+.group:hover .leader {
   stroke: var(--line-strong);
 }
 
@@ -81,8 +76,7 @@
   fill: #ffffff;
 }
 
-.group.active .leader,
-.group.active .tick {
+.group.active .leader {
   stroke: var(--color-accent);
 }
 
@@ -99,8 +93,7 @@
   outline: none;
 }
 
-.group:focus-visible .leader,
-.group:focus-visible .tick {
+.group:focus-visible .leader {
   stroke: var(--color-accent);
 }
 
