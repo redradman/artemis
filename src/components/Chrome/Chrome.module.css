@@ -107,3 +107,32 @@
 .specValueAccent {
   color: var(--color-accent);
 }
+
+@media (max-width: 768px) {
+  .top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px 14px;
+  }
+
+  .title {
+    white-space: normal;
+  }
+
+  .name {
+    font-size: var(--text-18);
+    letter-spacing: var(--tracking-04);
+  }
+
+  .buttons {
+    flex-wrap: wrap;
+  }
+
+  .specs {
+    text-align: left;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+}

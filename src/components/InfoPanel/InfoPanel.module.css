@@ -109,3 +109,22 @@
   color: var(--color-fg-dim);
   font-style: italic;
 }
+
+@media (max-width: 768px) {
+  .panel {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 24px 20px;
+    border: none;
+    border-top: var(--hairline);
+    overflow-y: auto;
+    transform: translateY(100%);
+  }
+
+  .panel.open {
+    transform: translateY(0);
+  }
+}

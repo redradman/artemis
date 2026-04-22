@@ -7,6 +7,12 @@
   z-index: 2;
 }
 
+@media (max-width: 768px) {
+  .overlay {
+    display: none;
+  }
+}
+
 .group {
   transition: opacity 0.4s;
 }

@@ -58,3 +58,10 @@
   opacity: 0.28;
   pointer-events: none;
 }
+
+@media (max-width: 768px) {
+  .help,
+  .attribution {
+    display: none;
+  }
+}
