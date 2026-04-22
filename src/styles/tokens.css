@@ -1,16 +1,16 @@
 :root {
   --color-bg: #000000;
   --color-fg: #f0ebe0;
-  --color-fg-muted: rgba(240, 235, 224, 0.72);
-  --color-fg-dim: rgba(240, 235, 224, 0.48);
-  --color-fg-faint: rgba(240, 235, 224, 0.24);
+  --color-fg-muted: rgba(240, 235, 224, 0.85);
+  --color-fg-dim: rgba(240, 235, 224, 0.55);
+  --color-fg-faint: rgba(240, 235, 224, 0.28);
 
   --color-wire: rgba(240, 235, 224, 0.85);
   --color-wire-dim: rgba(240, 235, 224, 0.35);
   --color-wire-faint: rgba(240, 235, 224, 0.12);
 
-  --line: rgba(240, 235, 224, 0.4);
-  --line-strong: rgba(240, 235, 224, 0.9);
+  --line: rgba(240, 235, 224, 0.45);
+  --line-strong: rgba(240, 235, 224, 0.95);
 
   --color-accent: #e8a23b;
   --color-accent-dim: rgba(232, 162, 59, 0.55);
@@ -31,16 +31,19 @@
   --tracking-06: 0.22em;
   --tracking-07: 0.35em;
 
-  --text-7: 7.5px;
-  --text-8: 8px;
-  --text-9: 9px;
-  --text-10: 10px;
-  --text-11: 11px;
-  --text-12: 12px;
-  --text-13: 13px;
-  --text-14: 14px;
-  --text-18: 18px;
-  --text-22: 22px;
+  /* Type scale. Every size is >= 11px; the smallest tokens were ruthlessly
+   * tiny before and forced users to squint. Token names still reference the
+   * old pixel value but the actual sizes are what ship. */
+  --text-7: 11px;
+  --text-8: 11px;
+  --text-9: 12px;
+  --text-10: 12.5px;
+  --text-11: 13px;
+  --text-12: 13.5px;
+  --text-13: 15px;
+  --text-14: 16px;
+  --text-18: clamp(16px, 1.6vw, 20px);
+  --text-22: clamp(20px, 2.2vw, 26px);
 
   --weight-regular: 400;
   --weight-medium: 500;
@@ -50,16 +53,21 @@
   --hairline-faint: 1px solid var(--color-fg-faint);
   --hairline-accent: 1px solid var(--color-accent);
 
-  --chrome-pad-x: 28px;
-  --chrome-pad-y: 22px;
-  --edge-inset: 28px;
-  --panel-inset: 24px;
+  /* Edge insets scale fluidly with the viewport so the composition reads
+   * consistently on narrow aspect ratios and ultrawide monitors. */
+  --chrome-pad-x: clamp(14px, 2.4vw, 32px);
+  --chrome-pad-y: clamp(14px, 2vw, 24px);
+  --edge-inset: clamp(12px, 2vw, 28px);
+  --panel-inset: clamp(14px, 2vw, 28px);
+  --timeline-bottom: clamp(14px, 2vh, 26px);
 
   --panel-bg: rgba(0, 0, 0, 0.55);
   --panel-border: rgba(240, 235, 224, 0.12);
   --panel-blur: 12px;
 
+  /* Vignette kept neutral (no amber wash) so the white wireframe reads cool,
+   * not warm. Retained bottom dimmer for weight. */
   --vignette-bg:
-    radial-gradient(ellipse at 50% 55%, var(--color-accent-wash) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 55%, rgba(240, 235, 224, 0.015) 0%, transparent 55%),
     radial-gradient(ellipse at 50% 120%, rgba(240, 235, 224, 0.03) 0%, transparent 60%);
 }
