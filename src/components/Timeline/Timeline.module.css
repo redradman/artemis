@@ -1,0 +1,226 @@
+.wrap {
+  position: absolute;
+  left: var(--edge-inset);
+  right: var(--edge-inset);
+  bottom: 26px;
+  border: var(--hairline);
+  padding: 14px 20px 18px;
+  background: var(--color-bg);
+  z-index: 5;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.status {
+  font-size: var(--text-10);
+  letter-spacing: var(--tracking-04);
+  color: var(--color-fg-muted);
+}
+
+.statusValue {
+  color: var(--color-fg);
+}
+
+.statusNext {
+  margin-left: 16px;
+  color: var(--color-fg-dim);
+}
+
+.statusNextValue {
+  color: var(--color-accent);
+}
+
+.controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.playBtn {
+  background: transparent;
+  color: var(--color-fg);
+  border: var(--hairline);
+  font-family: var(--font-mono);
+  font-size: var(--text-9);
+  letter-spacing: var(--tracking-05);
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+.speedBtn {
+  background: transparent;
+  color: var(--color-fg);
+  border: var(--hairline);
+  font-family: var(--font-mono);
+  font-size: var(--text-9);
+  letter-spacing: var(--tracking-01);
+  padding: 5px 8px;
+  cursor: pointer;
+}
+
+.speedBtnActive {
+  background: var(--color-fg);
+  color: var(--color-bg);
+  border-color: var(--color-fg);
+}
+
+.phasePill {
+  margin-left: 10px;
+  font-size: var(--text-11);
+  letter-spacing: var(--tracking-06);
+  font-weight: var(--weight-semibold);
+  color: var(--color-accent);
+  padding: 4px 10px;
+  border: var(--hairline-accent);
+  background: var(--color-accent-wash);
+}
+
+.track {
+  position: relative;
+  height: 88px;
+  margin-top: 4px;
+}
+
+.baseline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 44px;
+  height: 1px;
+  background: var(--color-fg-dim);
+  opacity: 0.75;
+}
+
+.progress {
+  position: absolute;
+  left: 0;
+  top: 43px;
+  height: 3px;
+  background: linear-gradient(to right, var(--color-accent-dim), var(--color-accent));
+  box-shadow: 0 0 8px var(--color-accent-glow);
+  opacity: 0.9;
+}
+
+.tickCol {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  transform: translateX(-50%);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.tick {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 8px;
+  background: var(--color-fg-dim);
+  opacity: 0.5;
+}
+
+.tickMajor {
+  width: 2px;
+  height: 14px;
+  opacity: 0.7;
+}
+
+.tickPast {
+  background: var(--color-fg);
+  opacity: 0.9;
+}
+
+.tickCurrent {
+  background: var(--color-accent);
+  opacity: 1;
+}
+
+.tickAbove {
+  top: 32px;
+}
+
+.tickBelow {
+  top: 44px;
+}
+
+.labelGroup {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.labelGroupAbove {
+  bottom: 56px;
+}
+
+.labelGroupBelow {
+  top: 56px;
+}
+
+.label {
+  white-space: nowrap;
+  color: var(--color-fg);
+}
+
+.labelMajor {
+  font-size: var(--text-10);
+  letter-spacing: var(--tracking-05);
+  font-weight: var(--weight-semibold);
+  opacity: 0.65;
+}
+
+.labelMajorPast {
+  opacity: 0.95;
+}
+
+.labelMinor {
+  font-size: var(--text-8);
+  letter-spacing: var(--tracking-02);
+  font-weight: var(--weight-regular);
+  opacity: 0.35;
+}
+
+.labelMinorPast {
+  opacity: 0.55;
+}
+
+.labelCurrent {
+  color: var(--color-accent);
+  opacity: 1;
+}
+
+.labelSub {
+  font-size: var(--text-7);
+  letter-spacing: var(--tracking-03);
+  white-space: nowrap;
+  color: var(--color-fg);
+  opacity: 0.4;
+}
+
+.labelSubCurrent {
+  color: var(--color-accent);
+  opacity: 0.9;
+}
+
+.playhead {
+  position: absolute;
+  top: 38px;
+  transform: translateX(-50%) rotate(45deg);
+  width: 14px;
+  height: 14px;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-bg), 0 0 12px var(--color-accent-glow);
+  pointer-events: none;
+  z-index: 2;
+}
