@@ -9,6 +9,8 @@ import { useMissionState } from './hooks/useMissionState'
 import { useMissionStore } from './store/missionStore'
 import { useMissionPlayback } from './hooks/useMissionPlayback'
 import { components } from './scenes/ArtemisII/data/components'
+import { phases } from './scenes/ArtemisII/data/phases'
+import { findActivePhaseIndex } from './hooks/useMissionState'
 
 const STAR_COUNT = 80
 const STARS = Array.from({ length: STAR_COUNT }, (_, i) => ({
@@ -42,7 +44,31 @@ function App() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setActiveComponent(null)
+      const target = e.target as HTMLElement | null
+      const isTyping =
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable)
+      if (isTyping) return
+
+      if (e.key === 'Escape') {
+        setActiveComponent(null)
+        return
+      }
+      if (e.key === ' ') {
+        e.preventDefault()
+        useMissionStore.getState().togglePlay()
+        return
+      }
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault()
+        const { currentT, setTime } = useMissionStore.getState()
+        const idx = findActivePhaseIndex(currentT)
+        const next = e.key === 'ArrowRight' ? idx + 1 : idx - 1
+        const target = phases[Math.max(0, Math.min(phases.length - 1, next))]
+        setTime(target.t)
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -50,7 +76,11 @@ function App() {
 
   return (
     <main className={styles.root}>
-      <div className={styles.scene}>
+      <div
+        className={styles.scene}
+        role="img"
+        aria-label="Interactive 3D wireframe of the Artemis II launch vehicle: a Space Launch System core stage flanked by twin solid rocket boosters, topped by the Interim Cryogenic Propulsion Stage, the Orion service module with solar arrays, the crew module, and the launch abort system."
+      >
         <ArtemisIIScene />
       </div>
 

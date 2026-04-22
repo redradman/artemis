@@ -75,7 +75,17 @@ export function Labels({
           <g
             key={p.id}
             className={groupClassName}
+            role="button"
+            tabIndex={p.visible ? 0 : -1}
+            aria-label={p.label}
+            aria-pressed={isActive}
             onClick={() => onLabelClick?.(p.id)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onLabelClick?.(p.id)
+              }
+            }}
             onPointerEnter={() => onLabelHover?.(p.id)}
             onPointerLeave={() => onLabelHover?.(null)}
           >

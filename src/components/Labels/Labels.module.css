@@ -88,3 +88,23 @@
   fill: var(--color-accent);
   font-weight: var(--weight-medium);
 }
+
+.group:focus {
+  outline: none;
+}
+
+.group:focus-visible .leader,
+.group:focus-visible .tick {
+  stroke: var(--color-accent);
+}
+
+.group:focus-visible .dot,
+.group:focus-visible .text {
+  fill: var(--color-accent);
+}
+
+.group:focus-visible .text {
+  paint-order: stroke;
+  stroke: var(--color-accent);
+  stroke-width: 0.3;
+}

@@ -24,6 +24,13 @@ function easeOutCubic(t: number): number {
   return 1 - Math.pow(1 - t, 3)
 }
 
+function prefersReducedMotion(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
+  )
+}
+
 export function useCameraFlyTo(
   controlsRef: RefObject<ControlsLike | null>,
   target: THREE.Vector3,
@@ -58,6 +65,14 @@ export function useCameraFlyTo(
       fromPos.distanceTo(toPos) < SKIP_THRESHOLD &&
       fromTarget.distanceTo(worldTarget) < SKIP_THRESHOLD
     ) {
+      return
+    }
+
+    if (prefersReducedMotion()) {
+      camera.position.copy(toPos)
+      controls.target.copy(worldTarget)
+      controls.update()
+      animRef.current = null
       return
     }
 

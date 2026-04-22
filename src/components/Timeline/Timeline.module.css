@@ -52,6 +52,17 @@
   cursor: pointer;
 }
 
+.playBtn:focus,
+.speedBtn:focus {
+  outline: none;
+}
+
+.playBtn:focus-visible,
+.speedBtn:focus-visible {
+  outline: 1px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 .speedBtn {
   background: transparent;
   color: var(--color-fg);

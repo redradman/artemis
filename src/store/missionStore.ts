@@ -2,6 +2,10 @@ import { create } from 'zustand'
 
 export type PlaybackSpeed = 1 | 2 | 5
 
+const prefersReducedMotion =
+  typeof window !== 'undefined' &&
+  window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
+
 type MissionState = {
   currentT: number
   isPlaying: boolean
@@ -24,7 +28,7 @@ export const useMissionStore = create<MissionState>((set) => ({
   isPlaying: false,
   playbackSpeed: 1,
   activeComponent: null,
-  autoRotate: true,
+  autoRotate: !prefersReducedMotion,
   showLabels: true,
   setTime: (t) =>
     set(() => {
