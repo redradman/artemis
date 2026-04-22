@@ -22,6 +22,20 @@
   cursor: pointer;
 }
 
+.leaderHit {
+  stroke: transparent;
+  stroke-width: 10;
+  fill: none;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+.dotHit {
+  fill: transparent;
+  pointer-events: all;
+  cursor: pointer;
+}
+
 .leader {
   stroke: var(--line);
   stroke-width: 0.5;

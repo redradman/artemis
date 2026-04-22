@@ -114,6 +114,19 @@ export function Labels({
             >
               {p.label}
             </text>
+            <line
+              className={styles.leaderHit}
+              x1={tickX}
+              y1={p.y}
+              x2={p.anchor.x}
+              y2={p.anchor.y}
+            />
+            <circle
+              className={styles.dotHit}
+              cx={p.anchor.x}
+              cy={p.anchor.y}
+              r={9}
+            />
             <rect
               className={styles.hit}
               x={hitX}
