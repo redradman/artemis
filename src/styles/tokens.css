@@ -1,0 +1,24 @@
+:root {
+  --color-bg: #000000;
+  --color-fg: #f0ebe0;
+  --color-fg-muted: rgba(240, 235, 224, 0.72);
+  --color-fg-dim: rgba(240, 235, 224, 0.48);
+  --color-fg-faint: rgba(240, 235, 224, 0.24);
+
+  --color-wire: rgba(240, 235, 224, 0.85);
+  --color-wire-dim: rgba(240, 235, 224, 0.35);
+  --color-wire-faint: rgba(240, 235, 224, 0.12);
+
+  --color-accent: #e8a23b;
+  --color-accent-dim: rgba(232, 162, 59, 0.55);
+
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --tracking-tight: 2.5px;
+  --tracking-normal: 3px;
+  --tracking-wide: 8px;
+
+  --panel-bg: rgba(0, 0, 0, 0.55);
+  --panel-border: rgba(240, 235, 224, 0.12);
+  --panel-blur: 12px;
+}
