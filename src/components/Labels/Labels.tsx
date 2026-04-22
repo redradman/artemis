@@ -26,6 +26,7 @@ type PlacedLabel = {
 export type LabelsProps = {
   visible?: boolean
   visibility?: Record<string, boolean>
+  activeId?: string | null
   onLabelClick?: (id: string) => void
   onLabelHover?: (id: string | null) => void
 }
@@ -33,6 +34,7 @@ export type LabelsProps = {
 export function Labels({
   visible = true,
   visibility,
+  activeId,
   onLabelClick,
   onLabelHover,
 }: LabelsProps) {
@@ -63,9 +65,11 @@ export function Labels({
         const textWidth = p.label.length * APPROX_CHAR_WIDTH
         const hitX = isRight ? tickX - 4 : tickX - textWidth - HIT_PADDING_X
         const hitW = textWidth + HIT_PADDING_X + 8
-        const groupClassName = p.visible
-          ? styles.group
-          : `${styles.group} ${styles.groupHidden}`
+        const isActive = p.id === activeId
+        const classes = [styles.group]
+        if (!p.visible) classes.push(styles.groupHidden)
+        if (isActive) classes.push(styles.active)
+        const groupClassName = classes.join(' ')
 
         return (
           <g
