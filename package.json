@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "start": "serve -s dist -l ${PORT:-3000}",
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "lint": "eslint .",
@@ -22,6 +23,7 @@
     "@react-three/fiber": "^9.6.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "serve": "^14.2.6",
     "three": "^0.160.0",
     "zustand": "^5.0.12"
   },
