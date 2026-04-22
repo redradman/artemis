@@ -11,6 +11,8 @@
 
   --color-accent: #e8a23b;
   --color-accent-dim: rgba(232, 162, 59, 0.55);
+  --color-accent-wash: rgba(232, 162, 59, 0.09);
+  --color-accent-glow: rgba(232, 162, 59, 0.5);
 
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
@@ -18,7 +20,43 @@
   --tracking-normal: 3px;
   --tracking-wide: 8px;
 
+  --tracking-01: 0.12em;
+  --tracking-02: 0.14em;
+  --tracking-03: 0.15em;
+  --tracking-04: 0.18em;
+  --tracking-05: 0.2em;
+  --tracking-06: 0.22em;
+  --tracking-07: 0.35em;
+
+  --text-7: 7.5px;
+  --text-8: 8px;
+  --text-9: 9px;
+  --text-10: 10px;
+  --text-11: 11px;
+  --text-12: 12px;
+  --text-13: 13px;
+  --text-14: 14px;
+  --text-18: 18px;
+  --text-22: 22px;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  --hairline: 1px solid var(--color-fg-dim);
+  --hairline-faint: 1px solid var(--color-fg-faint);
+  --hairline-accent: 1px solid var(--color-accent);
+
+  --chrome-pad-x: 28px;
+  --chrome-pad-y: 22px;
+  --edge-inset: 28px;
+  --panel-inset: 24px;
+
   --panel-bg: rgba(0, 0, 0, 0.55);
   --panel-border: rgba(240, 235, 224, 0.12);
   --panel-blur: 12px;
+
+  --vignette-bg:
+    radial-gradient(ellipse at 50% 55%, var(--color-accent-wash) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 120%, rgba(240, 235, 224, 0.03) 0%, transparent 60%);
 }
