@@ -37,12 +37,11 @@ const SIDE_DEADZONE_RIGHT = 0.52
 const Y_OFFSCREEN_TOLERANCE = 0.1
 
 // Exclusion zones to keep labels clear of Chrome content.
-// Top-left: mission title + subtitle block.
-// Top-right: specs block (HEIGHT / MASS / THRUST / CREW rows).
-// The bottom is handled by MARGIN_BOTTOM; no separate cluster zone any more
-// since AUTO-ROTATE / LABELS / RESET now live inline in the timeline header.
-const TOP_LEFT_EXCLUSION = { height: 150, width: 400 }
-const TOP_RIGHT_EXCLUSION = { height: 160, width: 260 }
+// Top-left: mission title (single ARTEMIS II line — no subtitle).
+// Top-right: specs row (HEIGHT / MASS / THRUST / CREW) + HUD button row.
+// The bottom is handled by MARGIN_BOTTOM.
+const TOP_LEFT_EXCLUSION = { height: 90, width: 360 }
+const TOP_RIGHT_EXCLUSION = { height: 130, width: 320 }
 const EXCLUSION_PAD = 14
 
 type PlacedLabel = {
