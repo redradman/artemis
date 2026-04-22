@@ -326,8 +326,14 @@ function PhaseInfoPopover({
       onMouseDown={(e) => e.stopPropagation()}
     >
       <div className={styles.popoverHead}>
-        <div className={styles.popoverTitle} id={titleId}>
-          {phase.label}
+        <div>
+          <div className={styles.popoverKicker}>
+            T+ {phase.tplus} <span className={styles.popoverMetaDot}>·</span>{' '}
+            {phase.tier.toUpperCase()}
+          </div>
+          <h2 className={styles.popoverTitle} id={titleId}>
+            {phase.label}
+          </h2>
         </div>
         <button
           type="button"
@@ -338,29 +344,18 @@ function PhaseInfoPopover({
           ×
         </button>
       </div>
-      <div className={styles.popoverMeta}>
-        T+ {phase.tplus} <span className={styles.popoverMetaDot}>·</span>{' '}
-        {phase.tier.toUpperCase()}
-      </div>
-      <div className={styles.popoverDivider} />
-      <div className={styles.popoverSection}>
-        <div className={styles.popoverSectionLabel}>SIGNIFICANCE</div>
-        <div className={styles.popoverBody}>{phase.significance}</div>
-      </div>
-      <div className={styles.popoverSection}>
-        <div className={styles.popoverSectionLabel}>DESCRIPTION</div>
-        <div className={`${styles.popoverBody} ${styles.popoverBodyProse}`}>{phase.desc}</div>
-      </div>
-      <div className={styles.popoverSection}>
-        <div className={styles.popoverSectionLabel}>SOURCES</div>
-        <ul className={styles.popoverSources}>
-          {phase.sources.map((s, i) => (
-            <li key={i} className={styles.popoverSource}>
-              {s}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <blockquote className={styles.popoverLede}>
+        {phase.significance}
+      </blockquote>
+      <p className={styles.popoverBody}>{phase.desc}</p>
+      <div className={styles.popoverSourcesHead}>SOURCES</div>
+      <ul className={styles.popoverSources}>
+        {phase.sources.map((s, i) => (
+          <li key={i} className={styles.popoverSource}>
+            {s}
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

@@ -337,12 +337,12 @@
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
-  margin-bottom: 10px;
-  width: clamp(260px, 28vw, 360px);
-  max-height: 40vh;
+  margin-bottom: 12px;
+  width: clamp(300px, 30vw, 380px);
+  max-height: 50vh;
   overflow-y: auto;
-  padding: 18px;
-  background: rgba(0, 0, 0, 0.88);
+  padding: 20px 22px 22px;
+  background: rgba(0, 0, 0, 0.9);
   border: 1px solid var(--color-fg);
   backdrop-filter: blur(var(--panel-blur));
   -webkit-backdrop-filter: blur(var(--panel-blur));
@@ -367,22 +367,43 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-fg-faint);
+}
+
+.popoverKicker {
+  font-family: var(--font-mono);
+  font-size: var(--text-9);
+  letter-spacing: var(--tracking-05);
+  font-weight: var(--weight-medium);
+  color: var(--color-fg-muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.popoverMetaDot {
+  margin: 0 4px;
+  color: var(--color-fg-faint);
 }
 
 .popoverTitle {
-  font-size: var(--text-11);
+  font-family: var(--font-mono);
+  font-size: 17px;
   letter-spacing: var(--tracking-05);
   font-weight: var(--weight-semibold);
-  color: var(--color-accent);
+  color: var(--color-fg);
   text-transform: uppercase;
+  margin: 0;
+  line-height: 1.2;
 }
 
 .popoverClose {
   background: transparent;
   border: none;
   color: var(--color-fg-muted);
-  font-size: 18px;
+  font-size: 22px;
   line-height: 1;
   cursor: pointer;
   padding: 0 4px;
@@ -404,54 +425,41 @@
   outline-offset: 2px;
 }
 
-.popoverMeta {
-  margin-top: 4px;
-  font-family: var(--font-mono);
-  font-size: var(--text-9);
-  letter-spacing: var(--tracking-03);
-  color: var(--color-fg-muted);
-  opacity: 0.75;
+/* Significance as an accent pull-quote — amber left border, Inter 16px,
+ * positions it as the editorial "why this matters" line before the prose. */
+.popoverLede {
+  margin: 0 0 16px;
+  padding: 4px 0 4px 14px;
+  border-left: 2px solid var(--color-accent);
+  font-family: 'Inter', ui-sans-serif, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: var(--weight-medium);
+  color: var(--color-fg);
+  letter-spacing: 0.005em;
 }
 
-.popoverMetaDot {
-  margin: 0 4px;
-  opacity: 0.6;
+.popoverBody {
+  margin: 0 0 18px;
+  font-family: 'Inter', ui-sans-serif, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  font-weight: var(--weight-regular);
+  color: var(--color-fg);
+  opacity: 0.88;
+  letter-spacing: 0.008em;
 }
 
-.popoverDivider {
-  margin: 12px 0;
-  height: 1px;
-  background: var(--color-fg-dim);
-  opacity: 0.5;
-}
-
-.popoverSection {
-  margin-bottom: 12px;
-}
-
-.popoverSection:last-child {
-  margin-bottom: 0;
-}
-
-.popoverSectionLabel {
+.popoverSourcesHead {
   font-family: var(--font-mono);
   font-size: var(--text-9);
   letter-spacing: var(--tracking-04);
   font-weight: var(--weight-medium);
   color: var(--color-accent);
   text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-.popoverBody {
-  font-size: var(--text-11);
-  line-height: 1.5;
-  color: var(--color-fg);
-}
-
-.popoverBodyProse {
-  font-family: 'Inter', ui-sans-serif, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  line-height: 1.6;
+  margin: 0 0 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-fg-faint);
 }
 
 .popoverSources {
@@ -462,18 +470,20 @@
 
 .popoverSource {
   font-family: var(--font-mono);
-  font-size: var(--text-9);
+  font-size: var(--text-10);
   color: var(--color-fg-muted);
-  opacity: 0.8;
-  padding: 2px 0 2px 14px;
+  opacity: 0.9;
+  padding: 3px 0 3px 14px;
   position: relative;
+  letter-spacing: 0.01em;
 }
 
 .popoverSource::before {
   content: '•';
   position: absolute;
   left: 2px;
-  color: var(--color-fg-dim);
+  color: var(--color-accent);
+  opacity: 0.6;
 }
 
 .playhead {
