@@ -14,7 +14,9 @@ export function InfoPanel({ part }: InfoPanelProps) {
     <aside className={styles.panel}>
       <div className={styles.header}>
         <div className={styles.short}>COMPONENT · {part.short}</div>
-        <button type="button" className={styles.close} aria-label="Close panel">×</button>
+        <button type="button" className={styles.close} aria-label="Close panel">
+          ×
+        </button>
       </div>
       <div className={styles.name}>{part.name}</div>
       <p className={styles.purpose}>{part.info.purpose}</p>

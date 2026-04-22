@@ -42,7 +42,7 @@ function App() {
       <Timeline />
 
       <div className={styles.help}>
-        DRAG · ORBIT   SCROLL · ZOOM   CLICK · DETAILS   SPACE · PLAY   ← → · STEP
+        DRAG · ORBIT SCROLL · ZOOM CLICK · DETAILS SPACE · PLAY ← → · STEP
       </div>
     </main>
   )

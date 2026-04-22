@@ -220,7 +220,9 @@
   width: 14px;
   height: 14px;
   background: var(--color-accent);
-  box-shadow: 0 0 0 2px var(--color-bg), 0 0 12px var(--color-accent-glow);
+  box-shadow:
+    0 0 0 2px var(--color-bg),
+    0 0 12px var(--color-accent-glow);
   pointer-events: none;
   z-index: 2;
 }

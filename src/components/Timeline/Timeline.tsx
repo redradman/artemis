@@ -21,12 +21,16 @@ export function Timeline() {
           )}
         </div>
         <div className={styles.controls}>
-          <button type="button" className={styles.playBtn}>▶ PLAY</button>
+          <button type="button" className={styles.playBtn}>
+            ▶ PLAY
+          </button>
           {SPEEDS.map((s) => (
             <button
               key={s}
               type="button"
-              className={s === activeSpeed ? `${styles.speedBtn} ${styles.speedBtnActive}` : styles.speedBtn}
+              className={
+                s === activeSpeed ? `${styles.speedBtn} ${styles.speedBtnActive}` : styles.speedBtn
+              }
             >
               {s}×
             </button>
@@ -68,11 +72,19 @@ export function Timeline() {
             <div key={p.id} className={styles.tickCol} style={{ left: `${p.t * 100}%` }}>
               <div className={tickClasses} />
               <div
-                className={above ? `${styles.labelGroup} ${styles.labelGroupAbove}` : `${styles.labelGroup} ${styles.labelGroupBelow}`}
+                className={
+                  above
+                    ? `${styles.labelGroup} ${styles.labelGroupAbove}`
+                    : `${styles.labelGroup} ${styles.labelGroupBelow}`
+                }
               >
                 <div className={labelClasses}>{p.label}</div>
                 {isMajor && (
-                  <div className={isCurrent ? `${styles.labelSub} ${styles.labelSubCurrent}` : styles.labelSub}>
+                  <div
+                    className={
+                      isCurrent ? `${styles.labelSub} ${styles.labelSubCurrent}` : styles.labelSub
+                    }
+                  >
                     {p.tplus}
                   </div>
                 )}
