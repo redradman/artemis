@@ -83,6 +83,9 @@ function App() {
       <div className={styles.help}>
         DRAG · ORBIT SCROLL · ZOOM CLICK · DETAILS SPACE · PLAY ← → · STEP
       </div>
+      <div className={styles.attribution}>
+        DATA · NASA ARTEMIS II REFERENCE GUIDE · PUBLIC DOMAIN
+      </div>
     </main>
   )
 }

@@ -35,7 +35,7 @@
 
 .help {
   position: absolute;
-  bottom: 6px;
+  bottom: 18px;
   left: 0;
   right: 0;
   text-align: center;
@@ -43,5 +43,18 @@
   letter-spacing: var(--tracking-05);
   color: var(--color-fg);
   opacity: 0.38;
+  pointer-events: none;
+}
+
+.attribution {
+  position: absolute;
+  bottom: 6px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: var(--text-8);
+  letter-spacing: var(--tracking-05);
+  color: var(--color-fg);
+  opacity: 0.28;
   pointer-events: none;
 }

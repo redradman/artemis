@@ -36,7 +36,7 @@ export function InfoPanel() {
         <>
           <div className={styles.header}>
             <div className={styles.short}>
-              COMPONENT · {displayed.short}
+              {displayed.kicker} · {displayed.short}
             </div>
             <button
               type="button"
