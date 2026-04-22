@@ -1,0 +1,47 @@
+.root {
+  position: fixed;
+  inset: 0;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-mono);
+  overflow: hidden;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--vignette-bg);
+}
+
+.starfield {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  width: 100%;
+  height: 100%;
+}
+
+.star {
+  fill: var(--color-fg);
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  background: var(--color-bg);
+}
+
+.help {
+  position: absolute;
+  bottom: 6px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: var(--text-8);
+  letter-spacing: var(--tracking-05);
+  color: var(--color-fg);
+  opacity: 0.38;
+  pointer-events: none;
+}
