@@ -10,10 +10,9 @@ import { useMissionState } from '../../hooks/useMissionState'
 import { useMissionStore } from '../../store/missionStore'
 
 const DEFAULT_TARGET = new THREE.Vector3(0, 1.5, 0)
-// Pulled in from 200 → 160 (round 2 audit, item 1). At FOV 28° the visible
-// vertical span is 2·160·tan14° ≈ 79.7u, so the 73-unit-tall rocket reads
-// at ~92% of viewport height with a small margin around the LAS spire.
-const DEFAULT_RADIUS = 160
+// 250u puts the 73-unit-tall rocket at ~58% of viewport height so the
+// bottom timeline wrap never crops the RS-25 skirt on first load.
+const DEFAULT_RADIUS = 250
 
 // World-space centre of the rocket after the group's -28y translation.
 // Matches OrbitControls target; the Projector uses this for the facing test.
@@ -95,7 +94,7 @@ export function ArtemisIIScene() {
         fov: 28,
         near: 0.1,
         far: 2000,
-        position: [94.05, 1.5, 129.44],
+        position: [146.95, 1.5, 202.25],
       }}
     >
       {/* Fog near plane pushed past OrbitControls maxDistance (400) so the
