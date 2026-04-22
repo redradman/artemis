@@ -49,11 +49,6 @@ export function Chrome() {
           {mission.name}
           <span className={styles.nameRule} aria-hidden="true" />
         </div>
-        <div className={styles.meta}>
-          <span>{mission.subtitle}</span>
-          <span className={styles.metaDot} aria-hidden="true">·</span>
-          <span>{mission.subtitle2}</span>
-        </div>
       </div>
 
       <div className={styles.right}>
