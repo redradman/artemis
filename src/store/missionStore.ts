@@ -13,6 +13,12 @@ type MissionState = {
   activeComponent: string | null
   autoRotate: boolean
   showLabels: boolean
+  /**
+   * Increments every time the camera should fly back to the default view
+   * (on RESET). CameraRig depends on this in the flyTo memo so identical
+   * target/radius pairs still trigger a re-aim.
+   */
+  cameraResetNonce: number
   setTime: (t: number) => void
   togglePlay: () => void
   setSpeed: (speed: PlaybackSpeed) => void
@@ -30,6 +36,7 @@ export const useMissionStore = create<MissionState>((set) => ({
   activeComponent: null,
   autoRotate: !prefersReducedMotion,
   showLabels: true,
+  cameraResetNonce: 0,
   setTime: (t) =>
     set(() => {
       const clamped = Math.max(0, Math.min(1, t))
@@ -45,5 +52,12 @@ export const useMissionStore = create<MissionState>((set) => ({
   toggleAutoRotate: () => set((s) => ({ autoRotate: !s.autoRotate })),
   setAutoRotate: (autoRotate) => set({ autoRotate }),
   toggleLabels: () => set((s) => ({ showLabels: !s.showLabels })),
-  reset: () => set({ currentT: 0, isPlaying: false, activeComponent: null }),
+  reset: () =>
+    set((s) => ({
+      currentT: 0,
+      isPlaying: false,
+      activeComponent: null,
+      autoRotate: !prefersReducedMotion,
+      cameraResetNonce: s.cameraResetNonce + 1,
+    })),
 }))
