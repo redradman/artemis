@@ -8,76 +8,81 @@ import type { PlaybackSpeed } from '../../store/missionStore'
 
 const SPEEDS: readonly PlaybackSpeed[] = [1, 2, 5] as const
 
-// Adjacent labels closer than this fraction of the track width get anchored
-// to opposite edges of their tick column to avoid horizontal overlap.
-const PROXIMITY_THRESHOLD = 0.05
-
 type LabelAnchor = 'left' | 'center' | 'right'
+type LabelSide = 'above' | 'below'
 
-type LabelLayout = { anchor: LabelAnchor; stackUp: boolean; hideSub: boolean }
+// Minimum fraction-of-track gap between two same-side labels at the same
+// row. Below this the second label flips to the other side, then to a
+// stagger row if both sides are occupied.
+const MIN_GAP = 0.075
+// Boundary anchors (LIFTOFF at t=0 left-anchored, SPLASHDOWN at t=1 right-
+// anchored) visually extend past their tick rather than centering on it,
+// so the collision math shifts their effective position inward.
+const BOUNDARY_OFFSET = 0.04
 
-// Ticks within this gap of the first/last tick get paired with the boundary
-// even if they're above PROXIMITY_THRESHOLD; the boundary label has to hug
-// its edge, so near neighbours need to stack to avoid horizontal collisions.
-const BOUNDARY_PAIR_GAP = 0.1
+type LabelLayout = {
+  anchor: LabelAnchor
+  side: LabelSide
+  row: number
+}
 
-function computeLabelLayouts(
-  phases: readonly { t: number; tier: 'major' | 'minor' }[],
-  threshold = PROXIMITY_THRESHOLD,
-): LabelLayout[] {
-  const layouts: LabelLayout[] = phases.map(() => ({
-    anchor: 'center',
-    stackUp: false,
-    hideSub: false,
-  }))
+function computeLabelLayouts(phases: readonly Phase[]): LabelLayout[] {
+  // occupied[row] = lastT of the most recent label placed in that row on
+  // that side. Index 0 is the row nearest the baseline; higher indices are
+  // outer stagger rows.
+  const above: number[] = []
+  const below: number[] = []
+  const lastIdx = phases.length - 1
+  let prevSide: LabelSide | null = null
 
-  // General adjacent-pair resolution for same-tier collisions away from the
-  // track boundaries. Predecessor keeps the normal row; successor stacks up,
-  // both anchor-right (since this pattern fires on the far-right ENTRY /
-  // SPLASHDOWN cluster).
-  for (let i = 1; i < phases.length; i++) {
-    const gap = phases[i].t - phases[i - 1].t
-    if (gap >= threshold) continue
-    if (phases[i].tier !== phases[i - 1].tier) continue
-    layouts[i - 1].anchor = 'right'
-    layouts[i - 1].hideSub = true
-    layouts[i].anchor = 'right'
-    layouts[i].stackUp = true
-    layouts[i].hideSub = true
-  }
+  return phases.map((p, i) => {
+    const anchor: LabelAnchor =
+      i === 0 ? 'left' : i === lastIdx ? 'right' : 'center'
 
-  // Boundary handling. The first tick sits at t=0 and the last at t=1, so a
-  // centred label group would spill outside the wrap. Anchor the boundary
-  // labels inward and — if the closest same-tier follower (skipping over
-  // mixed-tier neighbours that render on the opposite row) would collide —
-  // stack it up. Runs after the general pass so these rules win.
-  if (phases.length >= 1) {
-    layouts[0].anchor = 'left'
+    const effectiveT =
+      anchor === 'left'
+        ? p.t + BOUNDARY_OFFSET
+        : anchor === 'right'
+          ? p.t - BOUNDARY_OFFSET
+          : p.t
 
-    let firstFollower = -1
-    for (let i = 1; i < phases.length; i++) {
-      if (phases[i].tier === phases[0].tier) {
-        firstFollower = i
-        break
-      }
+    // Inner row of each side (row 0): does the new label fit?
+    const aboveInnerOk = above.length === 0 || effectiveT - above[0] >= MIN_GAP
+    const belowInnerOk = below.length === 0 || effectiveT - below[0] >= MIN_GAP
+
+    let side: LabelSide
+    let row: number
+
+    if (aboveInnerOk && belowInnerOk) {
+      // Both inner rows free: alternate sides for the zigzag rhythm so the
+      // eye reads the timeline as paired ticks rather than a wall of names.
+      side = prevSide === 'below' ? 'above' : 'below'
+      row = 0
+    } else if (aboveInnerOk) {
+      side = 'above'
+      row = 0
+    } else if (belowInnerOk) {
+      side = 'below'
+      row = 0
+    } else {
+      // Both inner rows are too close — fall back to whichever outer row
+      // has the larger gap. Outer rows are rare (only the tightest LIFTOFF/
+      // SRB-SEP and ENTRY/SPLASHDOWN pairs trigger this branch).
+      const aboveOuterGap =
+        above.length < 2 ? Number.POSITIVE_INFINITY : effectiveT - above[1]
+      const belowOuterGap =
+        below.length < 2 ? Number.POSITIVE_INFINITY : effectiveT - below[1]
+      side = belowOuterGap >= aboveOuterGap ? 'below' : 'above'
+      row = 1
     }
-    if (
-      firstFollower > 0 &&
-      phases[firstFollower].t - phases[0].t < BOUNDARY_PAIR_GAP
-    ) {
-      layouts[0].hideSub = true
-      layouts[firstFollower].anchor = 'left'
-      layouts[firstFollower].stackUp = true
-      layouts[firstFollower].hideSub = true
-    }
 
-    const last = phases.length - 1
-    if (last > 0 && layouts[last].anchor === 'center') {
-      layouts[last].anchor = 'right'
-    }
-  }
+    const target = side === 'above' ? above : below
+    while (target.length <= row) target.push(Number.NEGATIVE_INFINITY)
+    target[row] = effectiveT
+    prevSide = side
 
-  return layouts
+    return { anchor, side, row }
+  })
 }
 
 export function Timeline() {
@@ -89,7 +94,6 @@ export function Timeline() {
   const setSpeed = useMissionStore((s) => s.setSpeed)
 
   const { activePhase, activePhaseIndex, tplus } = useMissionState()
-  const next = phases[activePhaseIndex + 1]
   const labelLayouts = computeLabelLayouts(phases)
 
   const trackRef = useRef<HTMLDivElement>(null)
@@ -134,7 +138,6 @@ export function Timeline() {
     }
   }, [scrubFromClientX])
 
-  // Close popover on outside click or Escape
   useEffect(() => {
     if (!openPhaseId) return
     const onMouseDown = (e: MouseEvent) => {
@@ -168,18 +171,11 @@ export function Timeline() {
       <div className={styles.head}>
         <div className={styles.status}>
           MISSION TIMELINE · <span className={styles.statusValue}>T+ {tplus}</span>
-          {next && (
-            <span className={styles.statusNext}>
-              NEXT · <span className={styles.statusNextValue}>{next.label}</span> · T+{' '}
-              {next.tplus}
-            </span>
-          )}
         </div>
         <div className={styles.controls}>
           <button type="button" className={styles.playBtn} onClick={togglePlay}>
             {isPlaying ? '❚❚ PAUSE' : '▶ PLAY'}
           </button>
-          <span className={styles.divider} aria-hidden="true" />
           <div className={styles.speedGroup}>
             {SPEEDS.map((s) => (
               <button
@@ -196,8 +192,8 @@ export function Timeline() {
               </button>
             ))}
           </div>
-          <div className={styles.phasePill}>▸ {activePhase.label}</div>
         </div>
+        <div className={styles.statusPhase}>{activePhase.label}</div>
       </div>
 
       <div
@@ -222,16 +218,14 @@ export function Timeline() {
           const isPast = currentT >= p.t - 0.001
           const isCurrent = i === activePhaseIndex
           const isMajor = p.tier === 'major'
-          const above = isMajor
           const layout = labelLayouts[i]
-          const anchor = layout.anchor
 
           const tickClasses = [
             styles.tick,
-            isMajor && styles.tickMajor,
+            layout.side === 'above' ? styles.tickAbove : styles.tickBelow,
+            layout.row === 1 && styles.tickStaggered,
             isPast && !isCurrent && styles.tickPast,
             isCurrent && styles.tickCurrent,
-            above ? styles.tickAbove : styles.tickBelow,
           ]
             .filter(Boolean)
             .join(' ')
@@ -246,20 +240,20 @@ export function Timeline() {
             .join(' ')
 
           const anchorClass =
-            anchor === 'left'
+            layout.anchor === 'left'
               ? styles.labelGroupAnchorLeft
-              : anchor === 'right'
+              : layout.anchor === 'right'
                 ? styles.labelGroupAnchorRight
                 : ''
 
-          const labelGroupClasses = [
-            styles.labelGroup,
-            above ? styles.labelGroupAbove : styles.labelGroupBelow,
-            anchorClass,
-            layout.stackUp && above ? styles.labelGroupStackUp : null,
-          ]
-            .filter(Boolean)
-            .join(' ')
+          const sideRowClass =
+            layout.side === 'above'
+              ? layout.row === 0
+                ? styles.labelAboveRow0
+                : styles.labelAboveRow1
+              : layout.row === 0
+                ? styles.labelBelowRow0
+                : styles.labelBelowRow1
 
           const isOpen = openPhaseId === p.id
           const popoverId = `phase-popover-${p.id}`
@@ -277,37 +271,28 @@ export function Timeline() {
               onMouseDown={(e) => e.stopPropagation()}
             >
               <div className={tickClasses} />
-              <div className={labelGroupClasses}>
-                <div className={styles.labelRow}>
-                  <div className={labelClasses}>{p.label}</div>
-                  <button
-                    ref={(el) => {
-                      iconRefs.current[p.id] = el
-                    }}
-                    type="button"
-                    className={`${styles.infoIcon} ${isMajor ? styles.infoIconMajor : styles.infoIconMinor}`}
-                    aria-label={`${p.label} details`}
-                    aria-expanded={isOpen}
-                    aria-controls={popoverId}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setOpenPhaseId((prev) => (prev === p.id ? null : p.id))
-                    }}
-                    onMouseDown={(e) => e.stopPropagation()}
-                  >
-                    i
-                  </button>
-                </div>
-                {isMajor && !layout.hideSub && (
-                  <div
-                    className={
-                      isCurrent ? `${styles.labelSub} ${styles.labelSubCurrent}` : styles.labelSub
-                    }
-                  >
-                    T+ {p.tplus}
-                  </div>
-                )}
+
+              <div className={`${styles.labelGroup} ${sideRowClass} ${anchorClass}`}>
+                <div className={labelClasses}>{p.label}</div>
+                <button
+                  ref={(el) => {
+                    iconRefs.current[p.id] = el
+                  }}
+                  type="button"
+                  className={`${styles.infoIcon} ${isMajor ? styles.infoIconMajor : styles.infoIconMinor}`}
+                  aria-label={`${p.label} details`}
+                  aria-expanded={isOpen}
+                  aria-controls={popoverId}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setOpenPhaseId((prev) => (prev === p.id ? null : p.id))
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  i
+                </button>
               </div>
+
               {isOpen && (
                 <PhaseInfoPopover
                   id={popoverId}
