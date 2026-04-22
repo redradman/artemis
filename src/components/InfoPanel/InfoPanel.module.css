@@ -9,6 +9,14 @@
   color: var(--color-fg);
   font-family: var(--font-mono);
   z-index: 10;
+  transform: translateX(calc(100% + var(--panel-inset) + 4px));
+  transition: transform 300ms ease;
+  pointer-events: none;
+}
+
+.panel.open {
+  transform: translateX(0);
+  pointer-events: auto;
 }
 
 .header {
