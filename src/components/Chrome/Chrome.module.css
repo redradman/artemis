@@ -1,0 +1,97 @@
+.top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: var(--chrome-pad-y) var(--chrome-pad-x);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.title,
+.buttons,
+.specs {
+  pointer-events: auto;
+}
+
+.title {
+  white-space: nowrap;
+}
+
+.name {
+  font-size: var(--text-22);
+  letter-spacing: var(--tracking-07);
+  font-weight: var(--weight-medium);
+  color: var(--color-fg);
+}
+
+.subtitle {
+  font-size: var(--text-10);
+  letter-spacing: var(--tracking-04);
+  color: var(--color-fg-dim);
+  margin-top: 6px;
+}
+
+.subtitle + .subtitle {
+  margin-top: 0;
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn {
+  background: transparent;
+  color: var(--color-fg);
+  border: var(--hairline);
+  font-family: var(--font-mono);
+  font-size: var(--text-9);
+  letter-spacing: var(--tracking-05);
+  font-weight: var(--weight-regular);
+  padding: 6px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn:hover {
+  border-color: var(--color-fg);
+}
+
+.btnActive {
+  background: var(--color-fg);
+  color: var(--color-bg);
+  border-color: var(--color-fg);
+}
+
+.specs {
+  text-align: right;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.specRow {
+  font-size: var(--text-10);
+  letter-spacing: var(--tracking-04);
+}
+
+.specKey {
+  color: var(--color-fg-dim);
+}
+
+.specValue {
+  color: var(--color-fg);
+  margin-left: 0.5ch;
+}
+
+.specValueAccent {
+  color: var(--color-accent);
+}
