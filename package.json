@@ -6,9 +6,15 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "preview": "vite preview",
     "typecheck": "tsc -b",
-    "preview": "vite preview"
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=10"
   },
   "dependencies": {
     "@fontsource/jetbrains-mono": "^5.2.8",
