@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import type { StageId } from '../lib/stateAt'
 
 export type LabelSide = 'left' | 'right'
 
@@ -10,6 +11,7 @@ export type RocketComponent = {
   focusRadius: number
   side: LabelSide
   offset: { x: number; y: number }
+  stage: StageId
 }
 
 export const components: RocketComponent[] = [
@@ -21,6 +23,7 @@ export const components: RocketComponent[] = [
     focusRadius: 30,
     side: 'right',
     offset: { x: 0, y: -100 },
+    stage: 'las',
   },
   {
     id: 'abort-motor',
@@ -30,6 +33,7 @@ export const components: RocketComponent[] = [
     focusRadius: 20,
     side: 'right',
     offset: { x: 140, y: -20 },
+    stage: 'las',
   },
   {
     id: 'crew-module',
@@ -39,6 +43,7 @@ export const components: RocketComponent[] = [
     focusRadius: 25,
     side: 'left',
     offset: { x: -180, y: -40 },
+    stage: 'crew',
   },
   {
     id: 'heat-shield',
@@ -48,6 +53,7 @@ export const components: RocketComponent[] = [
     focusRadius: 22,
     side: 'left',
     offset: { x: -180, y: 20 },
+    stage: 'crew',
   },
   {
     id: 'solar-array',
@@ -57,6 +63,7 @@ export const components: RocketComponent[] = [
     focusRadius: 30,
     side: 'right',
     offset: { x: 160, y: -30 },
+    stage: 'sm',
   },
   {
     id: 'service-module',
@@ -66,6 +73,7 @@ export const components: RocketComponent[] = [
     focusRadius: 25,
     side: 'right',
     offset: { x: 170, y: 30 },
+    stage: 'sm',
   },
   {
     id: 'icps',
@@ -75,6 +83,7 @@ export const components: RocketComponent[] = [
     focusRadius: 28,
     side: 'right',
     offset: { x: 170, y: 0 },
+    stage: 'icps',
   },
   {
     id: 'core-stage',
@@ -84,6 +93,7 @@ export const components: RocketComponent[] = [
     focusRadius: 55,
     side: 'left',
     offset: { x: -180, y: -10 },
+    stage: 'core',
   },
   {
     id: 'intertank',
@@ -93,6 +103,7 @@ export const components: RocketComponent[] = [
     focusRadius: 30,
     side: 'right',
     offset: { x: 170, y: 10 },
+    stage: 'core',
   },
   {
     id: 'lh2-tank',
@@ -102,6 +113,7 @@ export const components: RocketComponent[] = [
     focusRadius: 45,
     side: 'left',
     offset: { x: -170, y: 20 },
+    stage: 'core',
   },
   {
     id: 'solid-booster',
@@ -111,6 +123,7 @@ export const components: RocketComponent[] = [
     focusRadius: 45,
     side: 'right',
     offset: { x: 150, y: 0 },
+    stage: 'srbR',
   },
   {
     id: 'segment-joint',
@@ -120,6 +133,7 @@ export const components: RocketComponent[] = [
     focusRadius: 25,
     side: 'left',
     offset: { x: -160, y: 30 },
+    stage: 'srbL',
   },
   {
     id: 'rs-25',
@@ -129,6 +143,7 @@ export const components: RocketComponent[] = [
     focusRadius: 20,
     side: 'right',
     offset: { x: 180, y: 50 },
+    stage: 'core',
   },
   {
     id: 'aft-skirt',
@@ -138,5 +153,6 @@ export const components: RocketComponent[] = [
     focusRadius: 15,
     side: 'left',
     offset: { x: -170, y: 40 },
+    stage: 'srbL',
   },
 ]
