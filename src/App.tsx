@@ -1,8 +1,13 @@
+import { useMemo } from 'react'
 import styles from './App.module.css'
 import { Chrome } from './components/Chrome/Chrome'
 import { Timeline } from './components/Timeline/Timeline'
 import { Labels } from './components/Labels/Labels'
 import { ArtemisIIScene } from './scenes/ArtemisII'
+import { useMissionState } from './hooks/useMissionState'
+import { useMissionStore } from './store/missionStore'
+import { useMissionPlayback } from './hooks/useMissionPlayback'
+import { components } from './scenes/ArtemisII/data/components'
 
 const STAR_COUNT = 80
 const STARS = Array.from({ length: STAR_COUNT }, (_, i) => ({
@@ -14,6 +19,20 @@ const STARS = Array.from({ length: STAR_COUNT }, (_, i) => ({
 }))
 
 function App() {
+  useMissionPlayback()
+
+  const { state } = useMissionState()
+  const showLabels = useMissionStore((s) => s.showLabels)
+  const setActiveComponent = useMissionStore((s) => s.setActiveComponent)
+
+  const visibility = useMemo(() => {
+    const map: Record<string, boolean> = {}
+    for (const c of components) {
+      map[c.id] = state.stages[c.stage].visible
+    }
+    return map
+  }, [state])
+
   return (
     <main className={styles.root}>
       <div className={styles.scene}>
@@ -34,7 +53,11 @@ function App() {
         ))}
       </svg>
 
-      <Labels />
+      <Labels
+        visible={showLabels}
+        visibility={visibility}
+        onLabelClick={setActiveComponent}
+      />
 
       <Chrome />
       <Timeline />
