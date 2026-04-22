@@ -5,9 +5,6 @@ import { components } from '../../scenes/ArtemisII/data/components'
 import type { RocketComponent } from '../../scenes/ArtemisII/data/components'
 import styles from './Labels.module.css'
 
-const MARGIN_X_RATIO = 0.18 // column lives 18% in from each edge
-const MARGIN_X_MIN = 200
-const MARGIN_X_MAX = 240
 const MARGIN_TOP = 70
 const MARGIN_BOTTOM_RATIO = 0.28
 const MARGIN_BOTTOM_MIN = 140
@@ -15,6 +12,16 @@ const ROW_HEIGHT = 28
 const TEXT_OFFSET = 12
 const HIT_PADDING_X = 16
 const APPROX_CHAR_WIDTH = 8.6
+const EDGE_PAD = 18 // keep label text at least this far from the viewport edge
+
+// Proximity-based leader length. Labels whose anchor projects near the model
+// silhouette (far from the viewport horizontal centre) get a longer leader so
+// they read cleanly in their column; anchors deep inside the model (close to
+// centre) sit with a short leader right next to the geometry. Breaks the old
+// "every label wedged into one column" look.
+const MIN_LEADER = 70
+const MAX_LEADER = 240
+const SILHOUETTE_REACH_RATIO = 0.26 // how much of viewport width counts as "deep"
 
 // Small dead-zone around viewport centre: inside this band a label keeps its
 // last side; outside it the side snaps to the projected anchor's half of the
@@ -43,6 +50,9 @@ type PlacedLabel = {
   label: string
   anchor: { x: number; y: number }
   side: 'left' | 'right'
+  /** Horizontal position of the leader terminal (dot). Varies per-label based
+   *  on anchor depth so labels don't all stack to the same column. */
+  tickX: number
   desiredY: number
   y: number
   visible: boolean
@@ -75,8 +85,6 @@ export function Labels({
     [projections, visibility, viewport],
   )
 
-  const marginX = computeMarginX(viewport.width)
-
   if (!visible || viewport.width === 0) {
     return <svg className={styles.overlay} aria-hidden="true" />
   }
@@ -91,7 +99,7 @@ export function Labels({
     >
       {placed.map((p) => {
         const isRight = p.side === 'right'
-        const tickX = isRight ? viewport.width - marginX : marginX
+        const tickX = p.tickX
         const textX = isRight ? tickX + TEXT_OFFSET : tickX - TEXT_OFFSET
         const textAnchor = isRight ? 'start' : 'end'
         const textWidth = p.label.length * APPROX_CHAR_WIDTH
@@ -161,14 +169,38 @@ export function Labels({
   )
 }
 
-function computeMarginX(width: number): number {
-  if (width === 0) return MARGIN_X_MAX
-  return Math.min(MARGIN_X_MAX, Math.max(MARGIN_X_MIN, width * MARGIN_X_RATIO))
-}
-
 function computeMarginBottom(height: number): number {
   if (height === 0) return MARGIN_BOTTOM_MIN
   return Math.max(MARGIN_BOTTOM_MIN, height * MARGIN_BOTTOM_RATIO)
+}
+
+/**
+ * Per-label leader length based on how close the projected anchor is to the
+ * viewport horizontal centre. Anchors near centre (deep inside the rocket) get
+ * a short leader; anchors near the side edges (on the silhouette) push out to
+ * a longer leader. Result is clamped so the label text always fits on-screen.
+ */
+function computeTickX(
+  anchorX: number,
+  side: 'left' | 'right',
+  label: string,
+  width: number,
+): number {
+  const center = width / 2
+  const distFromCenter = Math.abs(anchorX - center)
+  const silhouetteFactor = Math.min(
+    1,
+    distFromCenter / (width * SILHOUETTE_REACH_RATIO),
+  )
+  const leader = MIN_LEADER + silhouetteFactor * (MAX_LEADER - MIN_LEADER)
+
+  const textWidth = label.length * APPROX_CHAR_WIDTH
+  if (side === 'left') {
+    const minTickX = textWidth + TEXT_OFFSET + EDGE_PAD
+    return Math.max(minTickX, anchorX - leader)
+  }
+  const maxTickX = width - textWidth - TEXT_OFFSET - EDGE_PAD
+  return Math.min(maxTickX, anchorX + leader)
 }
 
 function chooseSide(
@@ -210,6 +242,8 @@ function layoutLabels(
     const side = chooseSide(proj.x, viewport.width, lastSides[c.id], c.side)
     lastSides[c.id] = side
 
+    const tickX = computeTickX(proj.x, side, c.label, viewport.width)
+
     const desiredY = clamp(
       proj.y + c.offset.y,
       MARGIN_TOP,
@@ -220,6 +254,7 @@ function layoutLabels(
       label: c.label,
       anchor: { x: proj.x, y: proj.y },
       side,
+      tickX,
       desiredY,
       y: desiredY,
       visible: visibility ? (visibility[c.id] ?? true) : true,
