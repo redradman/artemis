@@ -1,8 +1,9 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import styles from './App.module.css'
 import { Chrome } from './components/Chrome/Chrome'
 import { Timeline } from './components/Timeline/Timeline'
 import { Labels } from './components/Labels/Labels'
+import { InfoPanel } from './components/InfoPanel/InfoPanel'
 import { ArtemisIIScene } from './scenes/ArtemisII'
 import { useMissionState } from './hooks/useMissionState'
 import { useMissionStore } from './store/missionStore'
@@ -23,7 +24,9 @@ function App() {
 
   const { state } = useMissionState()
   const showLabels = useMissionStore((s) => s.showLabels)
+  const activeComponent = useMissionStore((s) => s.activeComponent)
   const setActiveComponent = useMissionStore((s) => s.setActiveComponent)
+  const setAutoRotate = useMissionStore((s) => s.setAutoRotate)
 
   const visibility = useMemo(() => {
     const map: Record<string, boolean> = {}
@@ -32,6 +35,18 @@ function App() {
     }
     return map
   }, [state])
+
+  useEffect(() => {
+    if (activeComponent) setAutoRotate(false)
+  }, [activeComponent, setAutoRotate])
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActiveComponent(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [setActiveComponent])
 
   return (
     <main className={styles.root}>
@@ -56,8 +71,11 @@ function App() {
       <Labels
         visible={showLabels}
         visibility={visibility}
+        activeId={activeComponent}
         onLabelClick={setActiveComponent}
       />
+
+      <InfoPanel />
 
       <Chrome />
       <Timeline />
