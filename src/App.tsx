@@ -1,9 +1,7 @@
 import styles from './App.module.css'
 import { Chrome } from './components/Chrome/Chrome'
 import { Timeline } from './components/Timeline/Timeline'
-import { InfoPanel } from './components/InfoPanel/InfoPanel'
 import { Labels } from './components/Labels/Labels'
-import { components } from './scenes/ArtemisII/data/components'
 import { ArtemisIIScene } from './scenes/ArtemisII'
 
 const STAR_COUNT = 80
@@ -16,8 +14,6 @@ const STARS = Array.from({ length: STAR_COUNT }, (_, i) => ({
 }))
 
 function App() {
-  const focusedPart = components.find((c) => c.id === 'core-lox')
-
   return (
     <main className={styles.root}>
       <div className={styles.scene}>
@@ -38,10 +34,9 @@ function App() {
         ))}
       </svg>
 
-      <Labels visible={!focusedPart} />
+      <Labels />
 
       <Chrome />
-      {focusedPart && <InfoPanel part={focusedPart} />}
       <Timeline />
 
       <div className={styles.help}>
