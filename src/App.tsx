@@ -4,6 +4,7 @@ import { Timeline } from './components/Timeline/Timeline'
 import { InfoPanel } from './components/InfoPanel/InfoPanel'
 import { Labels } from './components/Labels/Labels'
 import { components } from './scenes/ArtemisII/data/components'
+import { ArtemisIIScene } from './scenes/ArtemisII'
 
 const STAR_COUNT = 80
 const STARS = Array.from({ length: STAR_COUNT }, (_, i) => ({
@@ -19,7 +20,9 @@ function App() {
 
   return (
     <main className={styles.root}>
-      <div className={styles.scene} aria-label="3D scene placeholder" />
+      <div className={styles.scene}>
+        <ArtemisIIScene />
+      </div>
 
       <div className={styles.vignette} />
       <svg className={styles.starfield} aria-hidden="true">
