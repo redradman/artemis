@@ -59,7 +59,7 @@
   --chrome-pad-y: clamp(14px, 2vw, 24px);
   --edge-inset: clamp(12px, 2vw, 28px);
   --panel-inset: clamp(14px, 2vw, 28px);
-  --timeline-bottom: clamp(14px, 2vh, 26px);
+  --timeline-bottom: clamp(28px, 3.2vh, 40px);
 
   --panel-bg: rgba(0, 0, 0, 0.55);
   --panel-border: rgba(240, 235, 224, 0.12);
