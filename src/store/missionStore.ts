@@ -14,6 +14,7 @@ type MissionState = {
   setSpeed: (speed: PlaybackSpeed) => void
   setActiveComponent: (id: string | null) => void
   toggleAutoRotate: () => void
+  setAutoRotate: (v: boolean) => void
   toggleLabels: () => void
   reset: () => void
 }
@@ -38,6 +39,7 @@ export const useMissionStore = create<MissionState>((set) => ({
   setSpeed: (playbackSpeed) => set({ playbackSpeed }),
   setActiveComponent: (activeComponent) => set({ activeComponent }),
   toggleAutoRotate: () => set((s) => ({ autoRotate: !s.autoRotate })),
+  setAutoRotate: (autoRotate) => set({ autoRotate }),
   toggleLabels: () => set((s) => ({ showLabels: !s.showLabels })),
   reset: () => set({ currentT: 0, isPlaying: false, activeComponent: null }),
 }))
