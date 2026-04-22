@@ -6,14 +6,14 @@ import * as THREE from 'three'
 export const wireMain = new THREE.LineBasicMaterial({
   color: 0xffffff,
   transparent: true,
-  opacity: 0.78,
+  opacity: 0.85,
   fog: true,
 })
 
 export const wireMesh = new THREE.LineBasicMaterial({
   color: 0xffffff,
   transparent: true,
-  opacity: 0.18,
+  opacity: 0.25,
   fog: true,
 })
 
