@@ -16,6 +16,11 @@ type LabelAnchor = 'left' | 'center' | 'right'
 
 type LabelLayout = { anchor: LabelAnchor; stackUp: boolean; hideSub: boolean }
 
+// Ticks within this gap of the first/last tick get paired with the boundary
+// even if they're above PROXIMITY_THRESHOLD; the boundary label has to hug
+// its edge, so near neighbours need to stack to avoid horizontal collisions.
+const BOUNDARY_PAIR_GAP = 0.1
+
 function computeLabelLayouts(
   phases: readonly { t: number; tier: 'major' | 'minor' }[],
   threshold = PROXIMITY_THRESHOLD,
@@ -25,25 +30,53 @@ function computeLabelLayouts(
     stackUp: false,
     hideSub: false,
   }))
+
+  // General adjacent-pair resolution for same-tier collisions away from the
+  // track boundaries. Predecessor keeps the normal row; successor stacks up,
+  // both anchor-right (since this pattern fires on the far-right ENTRY /
+  // SPLASHDOWN cluster).
   for (let i = 1; i < phases.length; i++) {
     const gap = phases[i].t - phases[i - 1].t
-    if (gap < threshold) {
-      // Only resolve when both phases share the same tier (above or below the
-      // baseline). Mixed-tier neighbours already sit on opposite rows.
-      const sameTier = phases[i].tier === phases[i - 1].tier
-      if (!sameTier) continue
-      // Predecessor keeps the normal row; successor jumps up one row. Both
-      // suppress their T+ sublabel to keep each group short enough to fit
-      // cleanly into the track without the two groups vertically overlapping.
-      // Anchor both to the right edge of their tick — the later phase is
-      // typically the final tick pinned to 100% which would otherwise overflow.
-      layouts[i - 1].anchor = 'right'
-      layouts[i - 1].hideSub = true
-      layouts[i].anchor = 'right'
-      layouts[i].stackUp = true
-      layouts[i].hideSub = true
+    if (gap >= threshold) continue
+    if (phases[i].tier !== phases[i - 1].tier) continue
+    layouts[i - 1].anchor = 'right'
+    layouts[i - 1].hideSub = true
+    layouts[i].anchor = 'right'
+    layouts[i].stackUp = true
+    layouts[i].hideSub = true
+  }
+
+  // Boundary handling. The first tick sits at t=0 and the last at t=1, so a
+  // centred label group would spill outside the wrap. Anchor the boundary
+  // labels inward and — if the closest same-tier follower (skipping over
+  // mixed-tier neighbours that render on the opposite row) would collide —
+  // stack it up. Runs after the general pass so these rules win.
+  if (phases.length >= 1) {
+    layouts[0].anchor = 'left'
+
+    let firstFollower = -1
+    for (let i = 1; i < phases.length; i++) {
+      if (phases[i].tier === phases[0].tier) {
+        firstFollower = i
+        break
+      }
+    }
+    if (
+      firstFollower > 0 &&
+      phases[firstFollower].t - phases[0].t < BOUNDARY_PAIR_GAP
+    ) {
+      layouts[0].hideSub = true
+      layouts[firstFollower].anchor = 'left'
+      layouts[firstFollower].stackUp = true
+      layouts[firstFollower].hideSub = true
+    }
+
+    const last = phases.length - 1
+    if (last > 0 && layouts[last].anchor === 'center') {
+      layouts[last].anchor = 'right'
     }
   }
+
   return layouts
 }
 
