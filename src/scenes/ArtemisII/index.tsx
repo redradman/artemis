@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
+import { OrbitControls } from '@react-three/drei/core/OrbitControls.js'
 import { Rocket } from './Rocket'
 import { Projector } from '../../hooks/useProjectedPoints'
 import { useCameraFlyTo } from '../../hooks/useCameraFlyTo'

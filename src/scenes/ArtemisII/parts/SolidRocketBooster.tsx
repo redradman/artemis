@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import * as THREE from 'three'
 import { Wire } from '../geometry/Wire'
 import { wireAccent } from '../materials'
@@ -7,20 +6,18 @@ type SolidRocketBoosterProps = {
   x: number
 }
 
+const ringTorus = new THREE.TorusGeometry(1.92, 0.12, 8, 36)
+const geoms = {
+  body: new THREE.CylinderGeometry(1.85, 1.85, 40, 36, 16, false),
+  nose: new THREE.ConeGeometry(1.85, 4.5, 32, 6),
+  fwdSkirt: new THREE.CylinderGeometry(2.0, 1.85, 1.5, 32, 2, true),
+  aftSkirt: new THREE.CylinderGeometry(1.85, 2.2, 3, 32, 3, true),
+  nozzle: new THREE.CylinderGeometry(1.6, 1.1, 2.2, 24, 3, true),
+  ringEdges: new THREE.EdgesGeometry(ringTorus),
+}
+ringTorus.dispose()
+
 export function SolidRocketBooster({ x }: SolidRocketBoosterProps) {
-  const geoms = useMemo(() => {
-    const ring = new THREE.TorusGeometry(1.92, 0.12, 8, 36)
-    const ringEdges = new THREE.EdgesGeometry(ring)
-    ring.dispose()
-    return {
-      body: new THREE.CylinderGeometry(1.85, 1.85, 40, 36, 16, false),
-      nose: new THREE.ConeGeometry(1.85, 4.5, 32, 6),
-      fwdSkirt: new THREE.CylinderGeometry(2.0, 1.85, 1.5, 32, 2, true),
-      aftSkirt: new THREE.CylinderGeometry(1.85, 2.2, 3, 32, 3, true),
-      nozzle: new THREE.CylinderGeometry(1.6, 1.1, 2.2, 24, 3, true),
-      ringEdges,
-    }
-  }, [])
 
   return (
     <group position={[x, 0, 0]}>
