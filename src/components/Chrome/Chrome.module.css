@@ -25,8 +25,7 @@
  * sitting as a dead block. */
 .brand {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
   min-width: 0;
 }
 
@@ -53,22 +52,6 @@
   );
   min-width: 28px;
   max-width: 140px;
-}
-
-.meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: var(--text-10);
-  font-weight: var(--weight-medium);
-  letter-spacing: var(--tracking-04);
-  color: var(--color-fg-muted);
-  white-space: nowrap;
-  min-width: 0;
-}
-
-.metaDot {
-  color: var(--color-fg-faint);
 }
 
 /* Right side: specs + HUD buttons, stacked as a two-row compact block.
@@ -169,11 +152,6 @@
   .specs {
     justify-content: flex-start;
   }
-
-  .meta {
-    flex-wrap: wrap;
-    white-space: normal;
-  }
 }
 
 @media (max-width: 768px) {
@@ -187,11 +165,6 @@
   .name {
     font-size: var(--text-18);
     letter-spacing: var(--tracking-04);
-  }
-
-  .meta {
-    flex-wrap: wrap;
-    white-space: normal;
   }
 
   .right {
