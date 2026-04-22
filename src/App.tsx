@@ -8,9 +8,12 @@ import { ArtemisIIScene } from './scenes/ArtemisII'
 import { useMissionState } from './hooks/useMissionState'
 import { useMissionStore } from './store/missionStore'
 import { useMissionPlayback } from './hooks/useMissionPlayback'
+import { useProjectionStore } from './hooks/useProjectedPoints'
 import { components } from './scenes/ArtemisII/data/components'
 import { phases } from './scenes/ArtemisII/data/phases'
 import { findActivePhaseIndex } from './hooks/useMissionState'
+
+const SCALE_METERS = [0, 25, 50, 75, 100]
 
 const STAR_COUNT = 80
 const STARS = Array.from({ length: STAR_COUNT }, (_, i) => ({
@@ -20,6 +23,55 @@ const STARS = Array.from({ length: STAR_COUNT }, (_, i) => ({
   r: i % 7 === 0 ? 1.2 : 0.6,
   o: i % 5 === 0 ? 0.7 : 0.3,
 }))
+
+function ScaleReference() {
+  const projections = useProjectionStore((s) => s.projections)
+  const viewport = useProjectionStore((s) => s.viewport)
+
+  if (viewport.width === 0 || viewport.width < 768) return null
+
+  // Pull each metre tick's screen y from the projector. Filter to ticks that
+  // are on-screen so close zooms don't render floating labels.
+  const ticks = SCALE_METERS.map((m) => {
+    const p = projections[`scale:${m}`]
+    if (!p || !p.onScreen) return null
+    if (p.y < 20 || p.y > viewport.height - 20) return null
+    return { m, y: p.y }
+  }).filter((t): t is { m: number; y: number } => t !== null)
+
+  if (ticks.length < 2) return null
+
+  const topY = Math.min(...ticks.map((t) => t.y))
+  const bottomY = Math.max(...ticks.map((t) => t.y))
+  // Column anchor — matches --edge-inset clamp(12, 2vw, 28) in tokens.css.
+  const columnX = Math.min(28, Math.max(12, viewport.width * 0.02))
+
+  return (
+    <svg
+      className={styles.scaleRef}
+      aria-hidden="true"
+      viewBox={`0 0 ${viewport.width} ${viewport.height}`}
+      width={viewport.width}
+      height={viewport.height}
+    >
+      <line
+        className={styles.scaleRefLine}
+        x1={columnX}
+        x2={columnX}
+        y1={topY}
+        y2={bottomY}
+      />
+      {ticks.map(({ m, y }) => (
+        <g key={m} transform={`translate(${columnX} ${Math.round(y)})`}>
+          <line className={styles.scaleRefDash} x1={0} x2={12} y1={0} y2={0} />
+          <text className={styles.scaleRefLabel} x={18} y={4}>
+            {m.toString().padStart(2, '0')}m
+          </text>
+        </g>
+      ))}
+    </svg>
+  )
+}
 
 function App() {
   useMissionPlayback()
@@ -98,6 +150,10 @@ function App() {
         ))}
       </svg>
 
+      <div className={styles.horizon} aria-hidden="true" />
+
+      <ScaleReference />
+
       <Labels
         visible={showLabels}
         visibility={visibility}
@@ -108,14 +164,8 @@ function App() {
       <InfoPanel />
 
       <Chrome />
-      <Timeline />
 
-      <div className={styles.help}>
-        DRAG · ORBIT SCROLL · ZOOM CLICK · DETAILS SPACE · PLAY ← → · STEP
-      </div>
-      <div className={styles.attribution}>
-        DATA · NASA ARTEMIS II REFERENCE GUIDE · PUBLIC DOMAIN
-      </div>
+      <Timeline />
     </main>
   )
 }
