@@ -1,0 +1,35 @@
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+}
+
+.leader {
+  stroke: var(--color-fg);
+  stroke-width: 1;
+  opacity: 0.4;
+}
+
+.leaderActive {
+  stroke: var(--color-accent);
+  opacity: 0.9;
+}
+
+.dot {
+  fill: var(--color-fg);
+}
+
+.text {
+  font-family: var(--font-mono);
+  font-size: var(--text-10);
+  letter-spacing: var(--tracking-01);
+  fill: var(--color-fg);
+  opacity: 0.75;
+}
+
+.textActive {
+  fill: var(--color-accent);
+  opacity: 1;
+}
