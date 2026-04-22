@@ -4,13 +4,18 @@
   right: var(--edge-inset);
   bottom: var(--timeline-bottom);
   border: var(--hairline);
-  padding: 16px 22px 18px;
+  padding: 14px 22px 22px;
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(var(--panel-blur));
   -webkit-backdrop-filter: blur(var(--panel-blur));
   z-index: 5;
 }
 
+/* Single horizontal row: [status] [controls centred] [current phase right].
+ * The three children flex equally so the controls cluster stays optically
+ * centred even when the left and right text strings are different lengths.
+ * On narrow widths the row wraps with status keeping the left, controls and
+ * phase staying inline on a second row. */
 .head {
   display: flex;
   justify-content: space-between;
@@ -26,33 +31,34 @@
   font-weight: var(--weight-medium);
   color: var(--color-fg);
   min-width: 0;
-  flex: 1 1 auto;
+  flex: 1 1 0;
+  text-align: left;
 }
 
 .statusValue {
   color: var(--color-fg);
   font-weight: var(--weight-semibold);
-}
-
-.statusNext {
-  margin-left: 14px;
-  font-size: var(--text-9);
-  font-weight: var(--weight-regular);
-  color: var(--color-fg-muted);
-  opacity: 0.55;
-  white-space: nowrap;
-}
-
-.statusNextValue {
-  color: var(--color-accent);
+  margin-left: 6px;
+  font-size: var(--text-11);
+  letter-spacing: var(--tracking-04);
 }
 
 .controls {
   display: flex;
-  gap: 6px;
+  gap: 12px;
   align-items: center;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  flex: 0 0 auto;
+  justify-content: center;
+}
+
+.statusPhase {
+  font-size: var(--text-11);
+  letter-spacing: var(--tracking-05);
+  font-weight: var(--weight-semibold);
+  color: var(--color-fg);
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: right;
 }
 
 .playBtn,
@@ -64,7 +70,7 @@
   font-size: var(--text-9);
   font-weight: var(--weight-medium);
   letter-spacing: var(--tracking-04);
-  padding: 6px 10px;
+  padding: 6px 12px;
   cursor: pointer;
   white-space: nowrap;
   transition:
@@ -85,19 +91,22 @@
 }
 
 .playBtn {
-  padding: 6px 14px;
+  padding: 6px 16px;
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-05);
+  min-width: 84px;
 }
 
 .speedGroup {
   display: flex;
-  gap: 4px;
+  gap: 6px;
 }
 
 .speedBtn {
-  padding: 6px 9px;
+  padding: 6px 11px;
   letter-spacing: var(--tracking-02);
+  min-width: 36px;
+  text-align: center;
 }
 
 .playBtn:focus,
@@ -111,29 +120,22 @@
   outline-offset: 2px;
 }
 
-.divider {
-  width: 1px;
-  height: 22px;
-  background: var(--color-fg-dim);
-  opacity: 0.5;
-  margin: 0 4px;
-  display: inline-block;
-}
-
-.phasePill {
-  margin-left: 8px;
-  font-size: var(--text-11);
-  letter-spacing: var(--tracking-05);
-  font-weight: var(--weight-semibold);
-  color: var(--color-accent);
-  padding: 5px 12px;
-  border: var(--hairline-accent);
-  background: var(--color-accent-wash);
-}
-
+/* Track has the baseline running through the middle. Phase labels alternate
+ * above and below; their tick mark always extends from the baseline TOWARD
+ * the label so the eye reads "this name belongs to this tick".
+ *
+ * Vertical bands (track height 86px):
+ *   0..16px:  above row 1 (outer stagger)
+ *   18..34px: above row 0 (inner — most labels land here)
+ *   36..42px: tick (above) extending UP from baseline
+ *   42..43px: baseline
+ *   43..49px: tick (below) extending DOWN from baseline
+ *   51..67px: below row 0
+ *   69..85px: below row 1 (outer stagger)
+ */
 .track {
   position: relative;
-  height: 92px;
+  height: 86px;
   margin-top: 4px;
 }
 
@@ -141,7 +143,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: 46px;
+  top: 42px;
   height: 1px;
   background: var(--color-fg-dim);
   opacity: 0.8;
@@ -150,7 +152,7 @@
 .progress {
   position: absolute;
   left: 0;
-  top: 45px;
+  top: 41px;
   height: 2px;
   background: linear-gradient(to right, var(--color-accent-dim), var(--color-accent));
   box-shadow: 0 0 4px var(--color-accent-glow);
@@ -172,33 +174,43 @@
   left: 50%;
   transform: translateX(-50%);
   width: 1px;
-  height: 8px;
   background: var(--color-fg-dim);
-  opacity: 0.55;
+  opacity: 0.6;
 }
 
-.tickMajor {
-  width: 2px;
-  height: 14px;
-  opacity: 0.75;
+.tickAbove {
+  height: 6px;
+  top: 36px;
+}
+
+.tickBelow {
+  height: 6px;
+  top: 43px;
+}
+
+/* Outer-stagger ticks reach across the inner row band so they still visibly
+ * connect their (further-out) label to the baseline. */
+.tickStaggered {
+  height: 26px;
+}
+
+.tickAbove.tickStaggered {
+  top: 16px;
+}
+
+.tickBelow.tickStaggered {
+  top: 43px;
 }
 
 .tickPast {
   background: var(--color-fg);
-  opacity: 0.9;
+  opacity: 0.85;
 }
 
 .tickCurrent {
   background: var(--color-accent);
   opacity: 1;
-}
-
-.tickAbove {
-  top: 34px;
-}
-
-.tickBelow {
-  top: 46px;
+  width: 2px;
 }
 
 .labelGroup {
@@ -206,44 +218,35 @@
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  pointer-events: none;
-}
-
-.labelRow {
-  display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   pointer-events: auto;
+  white-space: nowrap;
 }
 
-.labelGroupAbove {
-  bottom: 58px;
+.labelAboveRow0 {
+  top: 18px;
 }
 
-.labelGroupBelow {
-  top: 58px;
+.labelAboveRow1 {
+  top: 0;
+}
+
+.labelBelowRow0 {
+  top: 51px;
+}
+
+.labelBelowRow1 {
+  top: 69px;
 }
 
 .labelGroupAnchorLeft {
   transform: translateX(0%);
-  align-items: flex-start;
 }
 
 .labelGroupAnchorRight {
   transform: translateX(-100%);
-  align-items: flex-end;
-}
-
-/* When two adjacent same-tier majors would collide horizontally, the later one
- * stacks one row above while the earlier one stays on the normal row. Both
- * groups hide their T+ sublabel (see JSX) so each is a single line, letting
- * the stacked pair fit the track vertically. */
-.labelGroupStackUp {
-  bottom: 78px;
 }
 
 .label {
@@ -255,7 +258,7 @@
   font-size: var(--text-10);
   letter-spacing: var(--tracking-05);
   font-weight: var(--weight-semibold);
-  opacity: 0.75;
+  opacity: 0.82;
 }
 
 .labelMajorPast {
@@ -266,28 +269,14 @@
   font-size: var(--text-9);
   letter-spacing: var(--tracking-02);
   font-weight: var(--weight-medium);
-  opacity: 0.6;
+  opacity: 0.62;
 }
 
 .labelMinorPast {
-  opacity: 0.75;
+  opacity: 0.78;
 }
 
 .labelCurrent {
-  color: var(--color-accent);
-  opacity: 1;
-}
-
-.labelSub {
-  font-size: var(--text-9);
-  letter-spacing: var(--tracking-03);
-  white-space: nowrap;
-  color: var(--color-fg);
-  font-weight: var(--weight-medium);
-  opacity: 0.85;
-}
-
-.labelSubCurrent {
   color: var(--color-accent);
   opacity: 1;
 }
@@ -488,7 +477,7 @@
 
 .playhead {
   position: absolute;
-  top: 39px;
+  top: 36px;
   transform: translateX(-50%) rotate(45deg);
   width: 14px;
   height: 14px;
@@ -502,41 +491,32 @@
 
 @media (max-width: 900px) {
   .wrap {
-    padding: 12px 14px 14px;
+    padding: 12px 14px 16px;
   }
 
   .head {
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 10px 14px;
+    margin-bottom: 12px;
   }
 
-  .statusNext {
-    display: none;
+  /* When wrapped onto multiple lines, let status keep the full first row
+   * and the controls + phase share the second row, instead of the flex:1
+   * forcing a weird half-width text column. */
+  .status,
+  .statusPhase {
+    flex: 1 1 100%;
+    text-align: left;
+  }
+
+  .statusPhase {
+    text-align: right;
   }
 
   .controls {
     flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-
-  .phasePill {
-    margin-left: auto;
-  }
-}
-
-@media (max-width: 1340px) {
-  .labelMinor {
-    display: none;
-  }
-
-  /* Hide the info icon next to minor phases when their labels are suppressed
-   * so we don't leave a floating 'i' without its phase name for context. */
-  .infoIconMinor {
-    display: none;
-  }
-
-  .tick:not(.tickMajor) {
-    opacity: 0.3;
+    justify-content: flex-start;
+    gap: 8px;
+    flex: 1 1 auto;
   }
 }
 
@@ -560,5 +540,24 @@
 
   .playhead {
     top: 10px;
+  }
+}
+
+/* Hide minor phase labels and their info icons on narrow desktops where the
+ * alternating layout still wouldn't have room. The ticks themselves stay
+ * visible (faint) so the timeline still reads as a structured progression. */
+@media (max-width: 1340px) {
+  .labelMinor {
+    display: none;
+  }
+
+  .infoIconMinor {
+    display: none;
+  }
+
+  /* Hide the minor ticks too since their label is gone. */
+  .tickAbove:not(.tickCurrent),
+  .tickBelow:not(.tickCurrent) {
+    /* still show them, just dimmer — preserved as silent progress markers */
   }
 }
