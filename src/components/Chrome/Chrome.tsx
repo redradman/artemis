@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import styles from './Chrome.module.css'
 import { mission } from '../../scenes/ArtemisII/data/mission'
+import { useMissionState } from '../../hooks/useMissionState'
+import { useMissionStore } from '../../store/missionStore'
 
 type SpecRowProps = {
   label: string
@@ -22,17 +24,34 @@ function SpecRow({ label, value, accent }: SpecRowProps) {
 type HudButtonProps = {
   children: ReactNode
   active?: boolean
+  onClick?: () => void
 }
 
-function HudButton({ children, active }: HudButtonProps) {
+function HudButton({ children, active, onClick }: HudButtonProps) {
   return (
-    <button type="button" className={active ? `${styles.btn} ${styles.btnActive}` : styles.btn}>
+    <button
+      type="button"
+      onClick={onClick}
+      className={active ? `${styles.btn} ${styles.btnActive}` : styles.btn}
+    >
       {children}
     </button>
   )
 }
 
+function formatMass(tonnes: number): string {
+  if (tonnes >= 100) return `${Math.round(tonnes).toLocaleString()} t`
+  return `${tonnes.toFixed(1)} t`
+}
+
 export function Chrome() {
+  const { stats } = useMissionState()
+  const autoRotate = useMissionStore((s) => s.autoRotate)
+  const showLabels = useMissionStore((s) => s.showLabels)
+  const toggleAutoRotate = useMissionStore((s) => s.toggleAutoRotate)
+  const toggleLabels = useMissionStore((s) => s.toggleLabels)
+  const reset = useMissionStore((s) => s.reset)
+
   return (
     <div className={styles.top}>
       <div className={styles.title}>
@@ -42,17 +61,19 @@ export function Chrome() {
       </div>
 
       <div className={styles.buttons}>
-        <HudButton>AUTO-ROTATE</HudButton>
-        <HudButton active>LABELS</HudButton>
-        <HudButton>RESET</HudButton>
+        <HudButton active={autoRotate} onClick={toggleAutoRotate}>
+          AUTO-ROTATE
+        </HudButton>
+        <HudButton active={showLabels} onClick={toggleLabels}>
+          LABELS
+        </HudButton>
+        <HudButton onClick={reset}>RESET</HudButton>
       </div>
 
       <div className={styles.specs}>
         <SpecRow label="HEIGHT" value={mission.height} />
-        <SpecRow label="MASS" value={mission.mass} />
-        <SpecRow label="THRUST" value={mission.thrust} />
-        <SpecRow label="ALT" value="NaNk km" accent />
-        <SpecRow label="VEL" value="NaN km/s" accent />
+        <SpecRow label="MASS" value={formatMass(stats.massTonnes)} />
+        <SpecRow label="THRUST" value={stats.thrustDisplay} />
         <SpecRow label="CREW" value="4 ABOARD" />
       </div>
     </div>
