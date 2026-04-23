@@ -15,11 +15,13 @@ import { findActivePhaseIndex } from './hooks/useMissionState'
 
 const SCALE_METERS = [0, 25, 50, 75, 100]
 
-// Hybrid keeps a sparse starfield that reads as schematic dotting.
-// Cinematic mode gets a denser field with warm/cool tint variation to
-// sell the deep-space backdrop.
-const HYBRID_STAR_COUNT = 80
-const CINEMATIC_STAR_COUNT = 320
+// Starfield layout. Rather than a uniform pseudo-random spread (which
+// reads as a structured grid), seed a handful of "constellations" — small
+// clusters of 3–7 stars with a bright anchor and a few dimmer neighbours —
+// and fill the gaps with scattered background stars. Not real
+// constellations, just the flavour of them: clustered, uneven, punctuated.
+const HYBRID_STAR_COUNT = 110
+const CINEMATIC_STAR_COUNT = 380
 
 type Star = {
   id: number
@@ -30,25 +32,87 @@ type Star = {
   tone: 'neutral' | 'warm' | 'cool'
 }
 
-function generateStars(count: number): Star[] {
-  return Array.from({ length: count }, (_, i) => {
-    // Pseudo-random but deterministic — same stars each reload.
-    const toneRoll = (i * 37) % 10
-    const tone: Star['tone'] =
-      toneRoll < 2 ? 'warm' : toneRoll < 4 ? 'cool' : 'neutral'
-    return {
-      id: i,
-      cx: (i * 73) % 100,
-      cy: (i * 131) % 100,
-      r: i % 9 === 0 ? 1.35 : i % 5 === 0 ? 0.9 : 0.55,
-      o: i % 5 === 0 ? 0.75 : i % 3 === 0 ? 0.45 : 0.28,
-      tone,
-    }
-  })
+function makeRand(seed: number): () => number {
+  // Tiny LCG — deterministic, good enough for static star layouts.
+  let s = seed >>> 0
+  return () => {
+    s = (s * 1664525 + 1013904223) >>> 0
+    return s / 0xffffffff
+  }
 }
 
-const HYBRID_STARS = generateStars(HYBRID_STAR_COUNT)
-const CINEMATIC_STARS = generateStars(CINEMATIC_STAR_COUNT)
+function pickTone(rand: () => number): Star['tone'] {
+  const r = rand()
+  if (r < 0.2) return 'warm'
+  if (r < 0.38) return 'cool'
+  return 'neutral'
+}
+
+function generateStars(count: number, seed: number): Star[] {
+  const rand = makeRand(seed)
+  const stars: Star[] = []
+  // Cluster density scales with total — one cluster per ~18 stars.
+  const clusterCount = Math.max(7, Math.floor(count / 18))
+  type Cluster = { x: number; y: number; spread: number }
+  const clusters: Cluster[] = []
+  // Distribute cluster centres with a rough blue-noise rejection so two
+  // clusters don't land on top of each other.
+  let attempts = 0
+  while (clusters.length < clusterCount && attempts < clusterCount * 8) {
+    attempts++
+    const candidate = { x: rand() * 100, y: rand() * 100, spread: 4 + rand() * 5 }
+    const tooClose = clusters.some(
+      (c) => Math.hypot(c.x - candidate.x, c.y - candidate.y) < 14,
+    )
+    if (!tooClose) clusters.push(candidate)
+  }
+
+  // Anchor star at each cluster — the bright one that gives the cluster
+  // its shape. Add 2–6 dimmer companions within `spread` radius.
+  for (const c of clusters) {
+    const anchorSize = 1.3 + rand() * 0.4
+    stars.push({
+      id: stars.length,
+      cx: c.x,
+      cy: c.y,
+      r: anchorSize,
+      o: 0.75 + rand() * 0.2,
+      tone: pickTone(rand),
+    })
+    const companions = 2 + Math.floor(rand() * 5)
+    for (let k = 0; k < companions; k++) {
+      const angle = rand() * Math.PI * 2
+      const dist = rand() * c.spread
+      stars.push({
+        id: stars.length,
+        cx: Math.max(0, Math.min(100, c.x + Math.cos(angle) * dist)),
+        cy: Math.max(0, Math.min(100, c.y + Math.sin(angle) * dist)),
+        r: 0.4 + rand() * 0.4,
+        o: 0.35 + rand() * 0.45,
+        tone: pickTone(rand),
+      })
+    }
+  }
+
+  // Scatter the remainder as isolated background dust stars so the sky
+  // isn't only clusters.
+  while (stars.length < count) {
+    stars.push({
+      id: stars.length,
+      cx: rand() * 100,
+      cy: rand() * 100,
+      r: rand() < 0.08 ? 0.9 : 0.4,
+      o: 0.18 + rand() * 0.3,
+      tone: pickTone(rand),
+    })
+  }
+  return stars
+}
+
+// Two different seeds so the hybrid and cinematic layouts differ subtly,
+// reinforcing the mode change without either feeling empty.
+const HYBRID_STARS = generateStars(HYBRID_STAR_COUNT, 0x2026_0a11)
+const CINEMATIC_STARS = generateStars(CINEMATIC_STAR_COUNT, 0x5a_11_1d_e5)
 
 function ScaleReference() {
   const projections = useProjectionStore((s) => s.projections)
