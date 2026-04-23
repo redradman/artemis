@@ -219,7 +219,11 @@ export function ArtemisIIScene() {
   return (
     <Canvas
       gl={{ antialias: true, alpha: true }}
-      dpr={[1, 2]}
+      // Cap device-pixel ratio at 1.5×. A full 2× on a retina display
+      // quadruples pixel-shading cost for a modest quality gain; the
+      // particle systems and bloom sprites already carry the visual
+      // load, so the extra resolution just burns GPU time.
+      dpr={[1, 1.5]}
       camera={{
         fov: 28,
         near: 0.1,
