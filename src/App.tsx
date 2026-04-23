@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo } from 'react'
 import styles from './App.module.css'
 import { Chrome } from './components/Chrome/Chrome'
+import { MobileNotice } from './components/Chrome/MobileNotice'
 import { Timeline } from './components/Timeline/Timeline'
 import { Labels } from './components/Labels/Labels'
 import { InfoPanel } from './components/InfoPanel/InfoPanel'
@@ -207,6 +208,10 @@ function App() {
   // so the colour mutation lands before the browser paints the frame.
   useLayoutEffect(() => {
     applyWirePalette(renderMode)
+    // Mirror the theme onto <html> so theme-scoped CSS vars (especially
+    // --scene-bg) cascade to html/body, which in turn paints iOS Safari's
+    // overscroll zone and the strip behind the overlaid address bar.
+    document.documentElement.dataset.theme = renderMode
   }, [renderMode])
 
   useEffect(() => {
@@ -301,6 +306,8 @@ function App() {
       <InfoPanel />
 
       <Chrome />
+
+      <MobileNotice />
 
       <Timeline />
     </main>

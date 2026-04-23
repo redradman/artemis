@@ -75,6 +75,13 @@
   --panel-border: rgba(240, 235, 224, 0.12);
   --panel-blur: 12px;
 
+  /* Page background that shows behind everything — including iOS Safari's
+   * overscroll zone and the area behind the overlaid address bar. Defaults
+   * to --color-bg so non-blueprint themes look unchanged; blueprint
+   * overrides it so the navy extends edge-to-edge on mobile instead of
+   * revealing a black gap below the timeline. */
+  --scene-bg: var(--color-bg);
+
   /* Heavy / strong / chip panel fills used by the Timeline wrap, the phase
    * popover, ZoomControls and InfoPanel. Defaults match the pre-theme
    * black-translucent look so space and cinematic themes are unchanged;
@@ -123,6 +130,10 @@
   --panel-bg-strong: rgba(10, 38, 72, 0.93);
   --panel-bg-chip: rgba(10, 38, 72, 0.4);
   --panel-bg-info: rgba(10, 38, 72, 0.88);
+
+  /* Match the blueprint backdrop colour so iOS Safari's rubber-band /
+   * address-bar area carries the same navy instead of a black gap. */
+  --scene-bg: #0b2e55;
 
   /* Crisper, more technical motion — blueprint snaps into place like
    * drafting software, no inertia. */
