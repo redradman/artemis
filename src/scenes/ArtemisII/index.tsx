@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
-import { Canvas, useThree } from '@react-three/fiber'
+import { Canvas, useThree, useFrame as useFrameHook } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei/core/OrbitControls.js'
 import { Rocket } from './Rocket'
 import { Projector } from '../../hooks/useProjectedPoints'
@@ -96,6 +96,70 @@ function CameraRig({
   return null
 }
 
+// Tiny dolly wobble applied during playback around a handful of marquee
+// phase events — SRB SEP, MECO, TLI, ENTRY. Gives the camera a whisper
+// of editorial push without overriding the user's orbit. Suspends
+// whenever a component focus or fly-to animation is active so it
+// doesn't fight `useCameraFlyTo`.
+const DRAMA_EVENTS: Array<{ t: number; push: number; half: number }> = [
+  { t: 0.08, push: -0.06, half: 0.022 }, // SRB SEP: slight push-in
+  { t: 0.22, push: 0.05, half: 0.022 }, // MECO: gentle pull-back
+  { t: 0.52, push: -0.05, half: 0.03 }, // TLI burn
+  { t: 0.96, push: 0.08, half: 0.022 }, // ENTRY: pull back for the plasma show
+]
+
+function dramaOffset(t: number): number {
+  let total = 0
+  for (const ev of DRAMA_EVENTS) {
+    const dist = Math.abs(t - ev.t)
+    if (dist >= ev.half) continue
+    const u = 1 - dist / ev.half
+    // Smooth bell: u^2 * (3 - 2u) — easeInOut hump centred on the event.
+    total += ev.push * (u * u * (3 - 2 * u))
+  }
+  return total
+}
+
+function CameraDrama({
+  controlsRef,
+}: {
+  controlsRef: React.RefObject<OrbitControlsRef | null>
+}) {
+  const camera = useThree((s) => s.camera)
+  const lastAppliedRef = useRef(0)
+  const isPlaying = useMissionStore((s) => s.isPlaying)
+  const activeComponent = useMissionStore((s) => s.activeComponent)
+
+  useFrameHook(() => {
+    const controls = controlsRef.current
+    if (!controls) return
+    if (!isPlaying || activeComponent) {
+      // Dissolve any residual drama so the camera returns cleanly to the
+      // baseline distance the user last held.
+      if (Math.abs(lastAppliedRef.current) > 0.0005) {
+        const undo = -lastAppliedRef.current * 0.15
+        const offset = camera.position.clone().sub(controls.target)
+        offset.multiplyScalar(1 + undo)
+        camera.position.copy(controls.target).add(offset)
+        lastAppliedRef.current += undo
+        controls.update()
+      }
+      return
+    }
+    const t = useMissionStore.getState().currentT
+    const target = dramaOffset(t)
+    const delta = target - lastAppliedRef.current
+    if (Math.abs(delta) < 0.0003) return
+    const offset = camera.position.clone().sub(controls.target)
+    offset.multiplyScalar(1 + delta)
+    camera.position.copy(controls.target).add(offset)
+    lastAppliedRef.current = target
+    controls.update()
+  })
+
+  return null
+}
+
 // Listens for window "artemis:zoom" events (dispatched by the HUD zoom
 // buttons) and dollies the camera toward/away from the orbit target. A
 // window event is the cleanest bridge across the Canvas reconciler
@@ -184,6 +248,7 @@ export function ArtemisIIScene() {
       />
       <CameraRig controlsRef={controlsRef} rocketRef={rocketRef} />
       <ZoomListener controlsRef={controlsRef} />
+      <CameraDrama controlsRef={controlsRef} />
     </Canvas>
   )
 }
