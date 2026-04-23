@@ -5,6 +5,7 @@ import { ParticleJet } from './ParticleJet'
 import { SepMotorPuffs, type Quill } from './SepMotorPuffs'
 import { EntryPlasma } from './EntryPlasma'
 import { Parachutes } from './Parachutes'
+import { BloomHalo } from './BloomHalo'
 import { wireActive } from '../materials'
 import type { MissionStageState } from '../lib/stateAt'
 
@@ -124,18 +125,26 @@ export function MissionEffects({ state, cinematic }: MissionEffectsProps) {
         visible={stages.core.visible}
       >
         {RS25_POSITIONS.map((pos, i) => (
-          <ParticleJet
-            key={i}
-            position={pos}
-            intensity={rs25On}
-            speed={18}
-            spread={0.12}
-            lifetime={0.55}
-            trailRadius={0.9}
-            trailLength={4.0}
-            count={rs25Count}
-            cinematic={cinematic}
-          />
+          <group key={i}>
+            <ParticleJet
+              position={pos}
+              intensity={rs25On}
+              speed={18}
+              spread={0.12}
+              lifetime={0.55}
+              trailRadius={0.9}
+              trailLength={4.0}
+              count={rs25Count}
+              cinematic={cinematic}
+            />
+            <BloomHalo
+              position={pos}
+              intensity={rs25On}
+              baseSize={cinematic ? 4.5 : 2.8}
+              phase={i * 0.7}
+              cinematic={cinematic}
+            />
+          </group>
         ))}
       </group>
 
@@ -153,6 +162,13 @@ export function MissionEffects({ state, cinematic }: MissionEffectsProps) {
             trailRadius={1.6}
             trailLength={6}
             count={srbCount}
+            cinematic={cinematic}
+          />
+          <BloomHalo
+            position={[0, -2.8, 0]}
+            intensity={srbOnL}
+            baseSize={cinematic ? 6 : 3.6}
+            phase={0.3}
             cinematic={cinematic}
           />
         </group>
@@ -173,6 +189,13 @@ export function MissionEffects({ state, cinematic }: MissionEffectsProps) {
             trailRadius={1.6}
             trailLength={6}
             count={srbCount}
+            cinematic={cinematic}
+          />
+          <BloomHalo
+            position={[0, -2.8, 0]}
+            intensity={srbOnR}
+            baseSize={cinematic ? 6 : 3.6}
+            phase={1.4}
             cinematic={cinematic}
           />
         </group>
@@ -196,6 +219,12 @@ export function MissionEffects({ state, cinematic }: MissionEffectsProps) {
           count={80}
           cinematic={cinematic}
         />
+        <BloomHalo
+          position={[0, 57.5, 0]}
+          intensity={lasJettOn}
+          baseSize={cinematic ? 1.8 : 1.2}
+          cinematic={cinematic}
+        />
       </group>
 
       {/* ICPS RL10. */}
@@ -214,6 +243,13 @@ export function MissionEffects({ state, cinematic }: MissionEffectsProps) {
           count={cinematic ? 160 : 100}
           cinematic={cinematic}
         />
+        <BloomHalo
+          position={[0, 42, 0]}
+          intensity={rl10On}
+          baseSize={cinematic ? 3.2 : 2}
+          pulseFreq={8}
+          cinematic={cinematic}
+        />
       </group>
 
       {/* ESM main engine (TLI) — on the service module. */}
@@ -230,6 +266,13 @@ export function MissionEffects({ state, cinematic }: MissionEffectsProps) {
             count={cinematic ? 150 : 95}
             cinematic={cinematic}
           />
+          <BloomHalo
+            position={[0, 47.3, 0]}
+            intensity={esmOn}
+            baseSize={cinematic ? 2.8 : 1.7}
+            pulseFreq={8}
+            cinematic={cinematic}
+          />
         </group>
         <SepMotorPuffs
           quills={CMSM_QUILLS}
@@ -240,7 +283,11 @@ export function MissionEffects({ state, cinematic }: MissionEffectsProps) {
       </group>
 
       {/* Entry plasma + parachutes on the crew module. */}
-      <EntryPlasma intensity={effects.plasma} shieldPosition={[0, 52, 0]} />
+      <EntryPlasma
+        intensity={effects.plasma}
+        shieldPosition={[0, 52, 0]}
+        cinematic={cinematic}
+      />
       <Parachutes
         intensity={effects.parachutes}
         capsuleTop={[0, 56.2, 0]}
