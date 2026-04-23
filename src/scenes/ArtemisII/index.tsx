@@ -179,6 +179,39 @@ function CameraDrama({
   return null
 }
 
+// Modulates OrbitControls.autoRotateSpeed on a slow sine so the idle
+// spin "breathes" — a specimen floating in a weightless chamber rather
+// than a turntable demo. Only active when auto-rotate is actually on,
+// controls are enabled (not mid fly-to), and nothing is focused; in any
+// other state the speed is left untouched so the constant baseline
+// still applies wherever code elsewhere reads it.
+const AUTO_ROTATE_BASE = 0.6
+const AUTO_ROTATE_AMPLITUDE = 0.18 // 0.42 .. 0.78 around the base
+const AUTO_ROTATE_PERIOD_S = 16
+
+function AutoRotateBreath({
+  controlsRef,
+}: {
+  controlsRef: React.RefObject<OrbitControlsRef | null>
+}) {
+  const tRef = useRef(0)
+
+  useFrameHook((_, delta) => {
+    const controls = controlsRef.current
+    if (!controls) return
+    if (!controls.enabled) return
+    if (useMissionStore.getState().activeComponent) return
+    if (!useMissionStore.getState().autoRotate) return
+
+    tRef.current += delta
+    const phase = (tRef.current / AUTO_ROTATE_PERIOD_S) * Math.PI * 2
+    controls.autoRotateSpeed =
+      AUTO_ROTATE_BASE + Math.sin(phase) * AUTO_ROTATE_AMPLITUDE
+  })
+
+  return null
+}
+
 // Listens for window "artemis:zoom" events (dispatched by the HUD zoom
 // buttons) and dollies the camera toward/away from the orbit target. A
 // window event is the cleanest bridge across the Canvas reconciler
@@ -272,6 +305,7 @@ export function ArtemisIIScene() {
       <CameraRig controlsRef={controlsRef} rocketRef={rocketRef} />
       <ZoomListener controlsRef={controlsRef} />
       <CameraDrama controlsRef={controlsRef} />
+      <AutoRotateBreath controlsRef={controlsRef} />
     </Canvas>
   )
 }
