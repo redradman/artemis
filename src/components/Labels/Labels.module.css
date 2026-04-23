@@ -27,9 +27,22 @@
   }
 }
 
+/* Small-viewport tuning. Labels stay visible on mobile — hiding them
+ * stripped the diagram of its annotations, which is the whole point. The
+ * text is dialled down and letter-spacing tightened so long names like
+ * "LAUNCH ABORT SYSTEM" still fit against the narrower rocket. */
 @media (max-width: 768px) {
-  .overlay {
-    display: none;
+  .text {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+  }
+
+  .leader {
+    stroke-width: 0.6;
+  }
+
+  .leaderHit {
+    stroke-width: 14;
   }
 }
 
