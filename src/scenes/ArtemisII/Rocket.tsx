@@ -42,6 +42,7 @@ export function Rocket({ ref }: RocketProps) {
   const activeComponent = useMissionStore((s) => s.activeComponent)
   const isPlaying = useMissionStore((s) => s.isPlaying)
   const cinematic = renderMode === 'cinematic'
+  const blueprint = renderMode === 'blueprint'
 
   return (
     <ActiveIdContext.Provider value={activeComponent}>
@@ -109,7 +110,12 @@ export function Rocket({ ref }: RocketProps) {
           </ClickableModule>
           {cinematic && <CinematicShell state={state} activeId={activeComponent} />}
           {!cinematic && <HybridDetails state={state} />}
-          <MissionEffects state={state} cinematic={cinematic} isPlaying={isPlaying} />
+          <MissionEffects
+            state={state}
+            cinematic={cinematic}
+            blueprint={blueprint}
+            isPlaying={isPlaying}
+          />
         </group>
       </group>
     </ActiveIdContext.Provider>

@@ -23,6 +23,9 @@ export type ParachutesProps = {
   capsuleTop: [number, number, number]
   /** When true, canopies use a richer, slightly larger style. */
   cinematic?: boolean
+  /** Blueprint mode — swap the amber fabric for a cyan tint so the
+   * splashdown canopies belong to the cyanotype palette. */
+  blueprint?: boolean
 }
 
 type CanopySpec = {
@@ -43,6 +46,9 @@ const BILLOW_FREQ = 1.8
 // Amber fabric base — cooler in hybrid, warmer + brighter in cinematic.
 const FABRIC_HYBRID = new THREE.Color('#e8a23b')
 const FABRIC_CINEMATIC = new THREE.Color('#f4b95c')
+// Blueprint fabric — paper-cyan to match the cyanotype palette. Used in
+// place of the amber fabric colour when the blueprint theme is active.
+const FABRIC_BLUEPRINT = new THREE.Color('#8fd2ff')
 
 function buildHemisphereGeometry(radius: number): THREE.BufferGeometry {
   // thetaStart=0, thetaLength=π/2 gives upper hemisphere. Plenty of
@@ -160,18 +166,27 @@ function Canopy({
   )
 }
 
-export function Parachutes({ intensity, capsuleTop, cinematic = false }: ParachutesProps) {
+export function Parachutes({
+  intensity,
+  capsuleTop,
+  cinematic = false,
+  blueprint = false,
+}: ParachutesProps) {
   const groupRef = useRef<THREE.Group>(null)
 
   const fabricMat = useMemo(() => {
     return new THREE.MeshBasicMaterial({
-      color: cinematic ? FABRIC_CINEMATIC : FABRIC_HYBRID,
+      color: blueprint
+        ? FABRIC_BLUEPRINT
+        : cinematic
+          ? FABRIC_CINEMATIC
+          : FABRIC_HYBRID,
       transparent: true,
       opacity: 0,
       side: THREE.DoubleSide,
       depthWrite: false,
     })
-  }, [cinematic])
+  }, [cinematic, blueprint])
 
   const seamMat = useMemo(() => {
     return new THREE.LineBasicMaterial({
