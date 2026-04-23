@@ -36,6 +36,7 @@ export function useCameraFlyTo(
   target: THREE.Vector3,
   radius: number,
   parentRef?: RefObject<THREE.Object3D | null>,
+  fixedPos?: THREE.Vector3,
 ) {
   const camera = useThree((s) => s.camera)
   const animRef = useRef<Animation | null>(null)
@@ -54,12 +55,20 @@ export function useCameraFlyTo(
     const fromPos = camera.position.clone()
     const fromTarget = controls.target.clone()
 
-    const offset = fromPos.clone().sub(fromTarget)
-    const dist = offset.length()
-    const dir =
-      dist > 1e-4 ? offset.divideScalar(dist) : new THREE.Vector3(0, 0, 1)
-
-    const toPos = worldTarget.clone().add(dir.multiplyScalar(radius))
+    // When fixedPos is supplied the caller wants an absolute destination
+    // (e.g. RESET restoring the page-load camera angle, not just its
+    // distance). Otherwise preserve the current viewing direction and
+    // just re-radius along it.
+    let toPos: THREE.Vector3
+    if (fixedPos) {
+      toPos = fixedPos.clone()
+    } else {
+      const offset = fromPos.clone().sub(fromTarget)
+      const dist = offset.length()
+      const dir =
+        dist > 1e-4 ? offset.divideScalar(dist) : new THREE.Vector3(0, 0, 1)
+      toPos = worldTarget.clone().add(dir.multiplyScalar(radius))
+    }
 
     if (
       fromPos.distanceTo(toPos) < SKIP_THRESHOLD &&
@@ -84,7 +93,7 @@ export function useCameraFlyTo(
       toTarget: worldTarget,
     }
     controls.enabled = false
-  }, [target, radius, camera, controlsRef, parentRef])
+  }, [target, radius, camera, controlsRef, parentRef, fixedPos])
 
   useFrame(() => {
     const anim = animRef.current

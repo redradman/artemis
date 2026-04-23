@@ -38,6 +38,11 @@ const DEFAULT_TARGET = new THREE.Vector3(0, 1.5, 0)
 // 250u puts the 73-unit-tall rocket at ~58% of viewport height so the
 // bottom timeline wrap never crops the RS-25 skirt on first load.
 const DEFAULT_RADIUS = 250
+// The exact camera pose used on page load. RESET flies back to this
+// absolute position so the ship returns to its original orientation
+// rather than just its original distance along whatever angle the
+// user last rotated to.
+const INITIAL_CAMERA_POSITION = new THREE.Vector3(146.95, 1.5, 202.25)
 
 // World-space centre of the rocket after the group's -28y translation.
 // Matches OrbitControls target; the Projector uses this for the facing test.
@@ -77,16 +82,25 @@ function CameraRig({
       // the selected part is framed with surrounding context instead
       // of filling the viewport edge-to-edge. With the new silhouette
       // highlight the whole outlined stage needs to be visible.
-      if (c) return { target: c.focus.clone(), radius: c.focusRadius * 1.8, local: true }
+      if (c)
+        return {
+          target: c.focus.clone(),
+          radius: c.focusRadius * 1.8,
+          local: true,
+          fixedPos: undefined as THREE.Vector3 | undefined,
+        }
     }
     // Clone DEFAULT_TARGET so each memo pass produces a new reference. That
     // way `cameraResetNonce` participating in the deps is enough to make
     // useCameraFlyTo re-trigger on RESET even though the logical goal is
-    // identical to what it was before the user rotated.
+    // identical to what it was before the user rotated. fixedPos pins the
+    // destination to the exact page-load camera pose so RESET restores the
+    // original orientation, not just the original distance.
     return {
       target: DEFAULT_TARGET.clone(),
       radius: DEFAULT_RADIUS,
       local: false,
+      fixedPos: INITIAL_CAMERA_POSITION.clone() as THREE.Vector3 | undefined,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeComponent, cameraResetNonce])
@@ -96,6 +110,7 @@ function CameraRig({
     goal.target,
     goal.radius,
     goal.local ? rocketRef : undefined,
+    goal.fixedPos,
   )
   return null
 }
