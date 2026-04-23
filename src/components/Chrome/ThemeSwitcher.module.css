@@ -1,15 +1,36 @@
-/* Three-pill segmented control sitting directly under the credit line.
- * Shares the mono-hairline language of the rest of the HUD buttons but
- * renders as a contiguous group so the "pick one of three" affordance
- * reads at a glance. */
-.group {
-  display: inline-flex;
-  gap: 0;
-  margin-top: 8px;
+/* Mode selector sitting under the credit line. A small "VIEW" kicker
+ * labels the cluster as a display-mode picker (not just three buttons),
+ * and each option carries a colour swatch representing its palette so
+ * the affordance reads at a glance even before you hover. */
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
   pointer-events: auto;
 }
 
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: var(--tracking-06);
+  font-weight: var(--weight-semibold);
+  color: var(--color-fg-dim);
+  text-transform: uppercase;
+  padding-right: 4px;
+  border-right: 1px solid var(--color-fg-faint);
+  user-select: none;
+}
+
+.group {
+  display: inline-flex;
+  gap: 0;
+}
+
 .pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   background: transparent;
   color: var(--color-fg);
   border: var(--hairline);
@@ -17,10 +38,10 @@
   font-size: var(--text-9);
   font-weight: var(--weight-medium);
   letter-spacing: var(--tracking-04);
-  padding: 5px 11px;
+  padding: 6px 11px;
   cursor: pointer;
   white-space: nowrap;
-  opacity: 0.75;
+  opacity: 0.7;
   transition:
     background 0.15s,
     color 0.15s,
@@ -28,7 +49,8 @@
     opacity 0.15s;
 }
 
-/* Collapse adjacent borders so the group reads as one pill-strip. */
+/* Collapse adjacent borders so the group reads as one continuous strip
+ * rather than three disconnected buttons. */
 .pill + .pill {
   border-left-width: 0;
 }
@@ -38,11 +60,34 @@
   opacity: 1;
 }
 
+/* Small palette swatch — shows the theme's primary accent so the option
+ * is self-describing. 7px circle with a thin inner ring so pale swatches
+ * stay visible against the pill background. */
+.swatch {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  flex: 0 0 auto;
+}
+
+.label {
+  /* ensures the label text shares baseline with the swatch */
+  line-height: 1;
+}
+
 .pillActive {
   background: var(--color-fg);
   color: var(--color-bg);
   border-color: var(--color-fg);
   opacity: 1;
+}
+
+/* Swatch shadow needs to flip on active (cream bg) — otherwise the ring
+ * disappears into the filled pill. */
+.pillActive .swatch {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
 }
 
 .pill:focus {
@@ -54,4 +99,13 @@
   outline-offset: 2px;
   position: relative;
   z-index: 1;
+}
+
+@media (max-width: 640px) {
+  .wrap {
+    gap: 6px;
+  }
+  .kicker {
+    display: none;
+  }
 }
