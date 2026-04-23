@@ -268,11 +268,12 @@ export function ArtemisIIScene() {
   return (
     <Canvas
       gl={{ antialias: true, alpha: true }}
-      // Cap device-pixel ratio at 1.5×. A full 2× on a retina display
-      // quadruples pixel-shading cost for a modest quality gain; the
-      // particle systems and bloom sprites already carry the visual
-      // load, so the extra resolution just burns GPU time.
-      dpr={[1, 1.5]}
+      // Cap device-pixel ratio at 2×. The 1.5× cap saved GPU time on
+      // retina desktops, but on phones (DPR 2-3) it read as mushy — the
+      // backing store was being upscaled to the physical display. 2× is
+      // a reasonable ceiling: crisp on phones and retina laptops without
+      // the 3× fragment cost.
+      dpr={[1, 2]}
       camera={{
         fov: 28,
         near: 0.1,
