@@ -14,6 +14,7 @@ export type MissionEffects = {
   lasJett: number
   rl10Prm: number
   rl10Arb: number
+  rcsBurst: number
   esmMain: number
   cmsmSep: number
   plasma: number
@@ -189,6 +190,15 @@ export function stateAt(t: number): MissionStageState {
   const esmMain = plateau(t, 0.5, 0.57, 0.01)
   const cmsmSep = triangle(t, 0.9, 0.92, 0.95)
 
+  // RCS attitude-control bursts. Three discrete event windows — PROX OPS
+  // maneuvering, the instant before the TLI burn commits, and a pair of
+  // pre-entry attitude checks. Blended via Math.max so any overlap is
+  // handled cleanly (in practice the windows are disjoint).
+  const rcsProxOps = plateau(t, 0.41, 0.46, 0.01)
+  const rcsTliStart = triangle(t, 0.515, 0.52, 0.535)
+  const rcsPreEntry = triangle(t, 0.925, 0.935, 0.95)
+  const rcsBurst = Math.max(rcsProxOps * 0.7, rcsTliStart, rcsPreEntry)
+
   // Plasma peaks at ENTRY (t=0.96) and fades as the capsule slows past
   // terminal velocity; parachutes ramp in during the last moment before
   // SPLASHDOWN at t=1.0.
@@ -211,6 +221,7 @@ export function stateAt(t: number): MissionStageState {
     lasJett,
     rl10Prm,
     rl10Arb,
+    rcsBurst,
     esmMain,
     cmsmSep,
     plasma,

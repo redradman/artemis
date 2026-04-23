@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import { ParticleJet } from './ParticleJet'
 import { SepMotorPuffs, type Quill } from './SepMotorPuffs'
+import { RcsPuffs } from './RcsPuffs'
 import { EntryPlasma } from './EntryPlasma'
 import { Parachutes } from './Parachutes'
 import { BloomHalo } from './BloomHalo'
@@ -110,6 +111,7 @@ export function MissionEffects({ state, cinematic }: MissionEffectsProps) {
   const esmOn = stages.sm.visible ? effects.esmMain : 0
   const lasJettOn = stages.las.visible ? effects.lasJett : 0
   const cmsmSepOn = stages.sm.visible ? effects.cmsmSep : 0
+  const rcsActiveOn = stages.sm.visible ? effects.rcsBurst : 0
 
   // RS-25 / SRB particle tuning. Cinematic mode scales up counts + trail
   // sizes; hybrid stays leaner.
@@ -280,6 +282,7 @@ export function MissionEffects({ state, cinematic }: MissionEffectsProps) {
           length={1.8}
           flickerFreq={24}
         />
+        <RcsPuffs intensity={rcsActiveOn} cinematic={cinematic} />
       </group>
 
       {/* Entry plasma + parachutes on the crew module. */}
