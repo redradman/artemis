@@ -104,6 +104,15 @@ function SolarArmAccent({ deploy }: { deploy: number }) {
   )
 }
 
+// Viewport-aware particle tuning. Small screens pay a real cost for
+// thousands of per-frame particle updates, so we halve the pool when the
+// window width is below a mobile-ish threshold.
+const SMALL_VIEWPORT_QUERY = '(max-width: 768px)'
+function isSmallViewport(): boolean {
+  if (typeof window === 'undefined' || !window.matchMedia) return false
+  return window.matchMedia(SMALL_VIEWPORT_QUERY).matches
+}
+
 export function MissionEffects({ state, cinematic }: MissionEffectsProps) {
   const { stages, solarDeploy, effects } = state
 
@@ -117,9 +126,15 @@ export function MissionEffects({ state, cinematic }: MissionEffectsProps) {
   const rcsActiveOn = stages.sm.visible ? effects.rcsBurst : 0
 
   // RS-25 / SRB particle tuning. Cinematic mode scales up counts + trail
-  // sizes; hybrid stays leaner.
-  const rs25Count = cinematic ? 180 : 110
-  const srbCount = cinematic ? 260 : 170
+  // sizes; hybrid stays leaner. Mobile-sized viewports get a ~0.55× budget
+  // so low-end GPUs don't stutter on ignition.
+  const small = isSmallViewport()
+  const mobileScale = small ? 0.55 : 1
+  const rs25Count = Math.round((cinematic ? 180 : 110) * mobileScale)
+  const srbCount = Math.round((cinematic ? 260 : 170) * mobileScale)
+  const rl10Count = Math.round((cinematic ? 160 : 100) * mobileScale)
+  const esmCount = Math.round((cinematic ? 150 : 95) * mobileScale)
+  const lasJettCount = Math.round(80 * mobileScale)
 
   return (
     <>
@@ -221,7 +236,7 @@ export function MissionEffects({ state, cinematic }: MissionEffectsProps) {
           lifetime={0.4}
           trailRadius={0.5}
           trailLength={2.5}
-          count={80}
+          count={lasJettCount}
           cinematic={cinematic}
         />
         <BloomHalo
@@ -245,7 +260,7 @@ export function MissionEffects({ state, cinematic }: MissionEffectsProps) {
           lifetime={0.65}
           trailRadius={0.85}
           trailLength={5}
-          count={cinematic ? 160 : 100}
+          count={rl10Count}
           cinematic={cinematic}
         />
         <BloomHalo
@@ -268,7 +283,7 @@ export function MissionEffects({ state, cinematic }: MissionEffectsProps) {
             lifetime={0.6}
             trailRadius={0.7}
             trailLength={4.2}
-            count={cinematic ? 150 : 95}
+            count={esmCount}
             cinematic={cinematic}
           />
           <BloomHalo
