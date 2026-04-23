@@ -20,8 +20,13 @@ type Animation = {
 const DURATION_MS = 800
 const SKIP_THRESHOLD = 0.01
 
-function easeOutCubic(t: number): number {
-  return 1 - Math.pow(1 - t, 3)
+// Sub-critically damped curve — tiny overshoot (~3%) past 1 before settling.
+// Reads as weight / inertia rather than a bouncy spring. Tuning c1 lower than
+// the canonical easeOutBack (1.70158) keeps the excursion under 5%.
+function easeOutBackSoft(t: number): number {
+  const c1 = 1.2
+  const c3 = c1 + 1
+  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2)
 }
 
 function prefersReducedMotion(): boolean {
@@ -103,7 +108,7 @@ export function useCameraFlyTo(
 
     const elapsed = performance.now() - anim.start
     const t = Math.min(1, elapsed / DURATION_MS)
-    const k = easeOutCubic(t)
+    const k = easeOutBackSoft(t)
 
     camera.position.lerpVectors(anim.fromPos, anim.toPos, k)
     controls.target.lerpVectors(anim.fromTarget, anim.toTarget, k)
