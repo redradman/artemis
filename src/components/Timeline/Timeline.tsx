@@ -5,6 +5,7 @@ import type { Phase } from '../../scenes/ArtemisII/data/phases'
 import { useMissionStore } from '../../store/missionStore'
 import { useMissionState } from '../../hooks/useMissionState'
 import type { PlaybackSpeed } from '../../store/missionStore'
+import { ZoomControls } from '../Chrome/ZoomControls'
 
 const SPEEDS: readonly PlaybackSpeed[] = [1, 2, 3, 5] as const
 
@@ -168,6 +169,7 @@ export function Timeline() {
 
   return (
     <div className={styles.wrap}>
+      <ZoomControls />
       <div className={styles.head}>
         <div className={styles.status}>
           MISSION TIMELINE · <span className={styles.statusValue}>T+ {tplus}</span>

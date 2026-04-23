@@ -1,11 +1,13 @@
-/* Compact vertical zoom pair sitting above the timeline wrap on the
- * right edge. Sized to match the HUD button vocabulary (border, mono,
- * medium weight) so it reads as part of the chrome rather than a
- * retrofit. */
+/* Compact vertical zoom pair sitting just above the timeline wrap on the
+ * right edge. Nested inside the Timeline container so `bottom: 100%`
+ * anchors to the wrap's top edge — the pair lifts out of the way
+ * automatically when the timeline grows on narrow viewports (multi-row
+ * header wrapping), eliminating the fixed-offset collision. Sized to
+ * match the HUD button vocabulary so it reads as part of the chrome. */
 .wrap {
   position: absolute;
-  right: var(--edge-inset);
-  bottom: clamp(210px, 27vh, 290px);
+  right: 0;
+  bottom: calc(100% + 8px);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -54,8 +56,3 @@
   transform: translateY(1px);
 }
 
-@media (max-width: 768px) {
-  .wrap {
-    bottom: 260px;
-  }
-}
