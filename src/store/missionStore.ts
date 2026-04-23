@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 
 export type PlaybackSpeed = 1 | 2 | 5
+export type RenderMode = 'hybrid' | 'cinematic'
 
 const prefersReducedMotion =
   typeof window !== 'undefined' &&
@@ -13,6 +14,7 @@ type MissionState = {
   activeComponent: string | null
   autoRotate: boolean
   showLabels: boolean
+  renderMode: RenderMode
   /**
    * Increments every time the camera should fly back to the default view
    * (on RESET). CameraRig depends on this in the flyTo memo so identical
@@ -26,6 +28,7 @@ type MissionState = {
   toggleAutoRotate: () => void
   setAutoRotate: (v: boolean) => void
   toggleLabels: () => void
+  toggleRenderMode: () => void
   reset: () => void
 }
 
@@ -36,6 +39,7 @@ export const useMissionStore = create<MissionState>((set) => ({
   activeComponent: null,
   autoRotate: !prefersReducedMotion,
   showLabels: true,
+  renderMode: 'hybrid',
   cameraResetNonce: 0,
   setTime: (t) =>
     set(() => {
@@ -55,6 +59,8 @@ export const useMissionStore = create<MissionState>((set) => ({
   toggleAutoRotate: () => set((s) => ({ autoRotate: !s.autoRotate })),
   setAutoRotate: (autoRotate) => set({ autoRotate }),
   toggleLabels: () => set((s) => ({ showLabels: !s.showLabels })),
+  toggleRenderMode: () =>
+    set((s) => ({ renderMode: s.renderMode === 'hybrid' ? 'cinematic' : 'hybrid' })),
   reset: () =>
     set((s) => ({
       currentT: 0,

@@ -10,6 +10,7 @@ import type { MissionStageState } from '../lib/stateAt'
 
 type MissionEffectsProps = {
   state: MissionStageState
+  cinematic: boolean
 }
 
 const RS25_POSITIONS: Array<[number, number, number]> = [
@@ -98,7 +99,7 @@ function SolarArmAccent({ deploy }: { deploy: number }) {
   )
 }
 
-export function MissionEffects({ state }: MissionEffectsProps) {
+export function MissionEffects({ state, cinematic }: MissionEffectsProps) {
   const { stages, solarDeploy, effects } = state
 
   const rs25On = stages.core.visible ? effects.rs25 : 0
@@ -108,6 +109,11 @@ export function MissionEffects({ state }: MissionEffectsProps) {
   const esmOn = stages.sm.visible ? effects.esmMain : 0
   const lasJettOn = stages.las.visible ? effects.lasJett : 0
   const cmsmSepOn = stages.sm.visible ? effects.cmsmSep : 0
+
+  // RS-25 / SRB particle tuning. Cinematic mode scales up counts + trail
+  // sizes; hybrid stays leaner.
+  const rs25Count = cinematic ? 180 : 110
+  const srbCount = cinematic ? 260 : 170
 
   return (
     <>
@@ -127,7 +133,8 @@ export function MissionEffects({ state }: MissionEffectsProps) {
             lifetime={0.55}
             trailRadius={0.9}
             trailLength={4.0}
-            count={110}
+            count={rs25Count}
+            cinematic={cinematic}
           />
         ))}
       </group>
@@ -145,7 +152,8 @@ export function MissionEffects({ state }: MissionEffectsProps) {
             lifetime={0.7}
             trailRadius={1.6}
             trailLength={6}
-            count={170}
+            count={srbCount}
+            cinematic={cinematic}
           />
         </group>
         <SepMotorPuffs quills={BSM_QUILLS_PER_BOOSTER} intensity={effects.srbSep} />
@@ -164,7 +172,8 @@ export function MissionEffects({ state }: MissionEffectsProps) {
             lifetime={0.7}
             trailRadius={1.6}
             trailLength={6}
-            count={170}
+            count={srbCount}
+            cinematic={cinematic}
           />
         </group>
         <SepMotorPuffs quills={BSM_QUILLS_PER_BOOSTER} intensity={effects.srbSep} />
@@ -185,6 +194,7 @@ export function MissionEffects({ state }: MissionEffectsProps) {
           trailRadius={0.5}
           trailLength={2.5}
           count={80}
+          cinematic={cinematic}
         />
       </group>
 
@@ -201,7 +211,8 @@ export function MissionEffects({ state }: MissionEffectsProps) {
           lifetime={0.65}
           trailRadius={0.85}
           trailLength={5}
-          count={100}
+          count={cinematic ? 160 : 100}
+          cinematic={cinematic}
         />
       </group>
 
@@ -216,7 +227,8 @@ export function MissionEffects({ state }: MissionEffectsProps) {
             lifetime={0.6}
             trailRadius={0.7}
             trailLength={4.2}
-            count={95}
+            count={cinematic ? 150 : 95}
+            cinematic={cinematic}
           />
         </group>
         <SepMotorPuffs

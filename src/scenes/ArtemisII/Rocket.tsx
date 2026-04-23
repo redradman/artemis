@@ -1,6 +1,7 @@
 import type { Ref } from 'react'
 import type * as THREE from 'three'
 import { useMissionState } from '../../hooks/useMissionState'
+import { useMissionStore } from '../../store/missionStore'
 import { ClickableModule } from './ClickableModule'
 import { CoreStage } from './parts/CoreStage'
 import { CrewModule } from './parts/CrewModule'
@@ -33,6 +34,7 @@ const INNER_Y = -28 - PIVOT_Y
 export function Rocket({ ref }: RocketProps) {
   const { state } = useMissionState()
   const { stages, solarDeploy, orientation } = state
+  const renderMode = useMissionStore((s) => s.renderMode)
 
   return (
     <group
@@ -95,7 +97,7 @@ export function Rocket({ ref }: RocketProps) {
         >
           <LaunchAbortSystem />
         </ClickableModule>
-        <MissionEffects state={state} />
+        <MissionEffects state={state} cinematic={renderMode === 'cinematic'} />
       </group>
     </group>
   )
