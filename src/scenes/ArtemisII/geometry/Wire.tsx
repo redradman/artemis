@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import { buildWire, type BuildWireOptions } from './buildWire'
-import { wireAccent, wireMain, wireMesh } from '../materials'
+import { useToneMaterials } from '../materials'
 
 type WireProps = BuildWireOptions & {
   geometry: THREE.BufferGeometry
@@ -14,6 +14,8 @@ export function Wire({ geometry, angle, dense = true, accent = false }: WireProp
     [geometry, angle, dense],
   )
 
+  const mats = useToneMaterials()
+
   useEffect(
     () => () => {
       edges.dispose()
@@ -24,8 +26,8 @@ export function Wire({ geometry, angle, dense = true, accent = false }: WireProp
 
   return (
     <>
-      <lineSegments geometry={edges} material={accent ? wireAccent : wireMain} />
-      {wireframe && <lineSegments geometry={wireframe} material={wireMesh} />}
+      <lineSegments geometry={edges} material={accent ? mats.accent : mats.main} />
+      {wireframe && <lineSegments geometry={wireframe} material={mats.mesh} />}
     </>
   )
 }

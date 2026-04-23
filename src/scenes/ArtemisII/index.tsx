@@ -73,7 +73,11 @@ function CameraRig({
   const goal = useMemo(() => {
     if (activeComponent) {
       const c = components.find((x) => x.id === activeComponent)
-      if (c) return { target: c.focus.clone(), radius: c.focusRadius, local: true }
+      // Pull the camera back by ~1.8× the per-component focusRadius so
+      // the selected part is framed with surrounding context instead
+      // of filling the viewport edge-to-edge. With the new silhouette
+      // highlight the whole outlined stage needs to be visible.
+      if (c) return { target: c.focus.clone(), radius: c.focusRadius * 1.8, local: true }
     }
     // Clone DEFAULT_TARGET so each memo pass produces a new reference. That
     // way `cameraResetNonce` participating in the deps is enough to make

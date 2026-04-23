@@ -1,7 +1,12 @@
-import { useMemo } from 'react'
+import { useContext, useMemo } from 'react'
 import * as THREE from 'three'
 import { Wire } from '../geometry/Wire'
-import { wireMesh } from '../materials'
+import {
+  ActiveIdContext,
+  ToneContext,
+  resolveSubTone,
+  useToneMaterials,
+} from '../materials'
 
 const WING_ANGLES = [
   Math.PI * 0.25,
@@ -16,6 +21,7 @@ type SolarWingProps = {
 }
 
 function SolarWing({ angle, deploy }: SolarWingProps) {
+  const mats = useToneMaterials()
   const geoms = useMemo(() => {
     const decorationPoints: THREE.Vector3[] = []
     for (let j = 0; j < 5; j++) {
@@ -46,7 +52,7 @@ function SolarWing({ angle, deploy }: SolarWingProps) {
         {[0, 1, 2].map((i) => (
           <group key={i} position={[0, 0, 0.9 + i * 2]}>
             <Wire geometry={geoms.panel} />
-            <lineSegments geometry={geoms.decoration} material={wireMesh} />
+            <lineSegments geometry={geoms.decoration} material={mats.mesh} />
           </group>
         ))}
       </group>
@@ -59,6 +65,8 @@ type ServiceModuleProps = {
 }
 
 export function ServiceModule({ solarDeploy = 0 }: ServiceModuleProps) {
+  const activeId = useContext(ActiveIdContext)
+
   const geoms = useMemo(
     () => ({
       body: new THREE.CylinderGeometry(2.3, 2.3, 4, 24, 4, false),
@@ -67,17 +75,24 @@ export function ServiceModule({ solarDeploy = 0 }: ServiceModuleProps) {
     [],
   )
 
+  const smTone = resolveSubTone(activeId, 'service-module')
+  const solarTone = resolveSubTone(activeId, 'solar-array')
+
   return (
     <group>
-      <group position={[0, 50.3, 0]}>
-        <Wire geometry={geoms.body} />
-      </group>
-      <group position={[0, 47.8, 0]}>
-        <Wire geometry={geoms.engine} />
-      </group>
-      {WING_ANGLES.map((angle, i) => (
-        <SolarWing key={i} angle={angle} deploy={solarDeploy} />
-      ))}
+      <ToneContext.Provider value={smTone}>
+        <group position={[0, 50.3, 0]}>
+          <Wire geometry={geoms.body} />
+        </group>
+        <group position={[0, 47.8, 0]}>
+          <Wire geometry={geoms.engine} />
+        </group>
+      </ToneContext.Provider>
+      <ToneContext.Provider value={solarTone}>
+        {WING_ANGLES.map((angle, i) => (
+          <SolarWing key={i} angle={angle} deploy={solarDeploy} />
+        ))}
+      </ToneContext.Provider>
     </group>
   )
 }
