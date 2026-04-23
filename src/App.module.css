@@ -84,6 +84,29 @@
   fill: #c6dcf4;
 }
 
+/* Randomly-phased twinkle applied to ~8% of stars. Slow enough that it
+ * reads as atmospheric breathing, not winking LEDs. The CSS `opacity`
+ * animation overrides the SVG `opacity` presentation attribute set
+ * inline on each circle. */
+.starTwinkle {
+  animation: starTwinkle 4.5s ease-in-out infinite;
+}
+
+@keyframes starTwinkle {
+  0%, 100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .starTwinkle {
+    animation: none;
+  }
+}
+
 .scene {
   position: absolute;
   inset: 0;

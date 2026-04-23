@@ -31,6 +31,11 @@ type Star = {
   r: number
   o: number
   tone: 'neutral' | 'warm' | 'cool'
+  // ~8% of stars get a slow, randomly-phased twinkle so the cosmos reads
+  // as alive without looking disco. `delay` is a per-star animation-delay
+  // in seconds, staggered so neighbours don't pulse in unison.
+  twinkle?: boolean
+  delay?: number
 }
 
 function makeRand(seed: number): () => number {
@@ -106,6 +111,15 @@ function generateStars(count: number, seed: number): Star[] {
       o: 0.18 + rand() * 0.3,
       tone: pickTone(rand),
     })
+  }
+  // Post-pass: mark ~8% of stars as twinklers with staggered delays so
+  // no two pulse in sync. Using the same seeded rand keeps the layout
+  // fully deterministic — twinkle positions don't shuffle across reloads.
+  for (const s of stars) {
+    if (rand() < 0.08) {
+      s.twinkle = true
+      s.delay = rand() * 6 // seconds, spread across a 6s window
+    }
   }
   return stars
 }
@@ -244,22 +258,32 @@ function App() {
         className={`${styles.starfield}${cinematic ? ` ${styles.starfieldCinematic}` : ''}`}
         aria-hidden="true"
       >
-        {stars.map((s) => (
-          <circle
-            key={s.id}
-            cx={`${s.cx}%`}
-            cy={`${s.cy}%`}
-            r={s.r}
-            opacity={s.o}
-            className={
-              s.tone === 'warm'
-                ? styles.starWarm
-                : s.tone === 'cool'
-                  ? styles.starCool
-                  : styles.star
-            }
-          />
-        ))}
+        {stars.map((s) => {
+          const toneClass =
+            s.tone === 'warm'
+              ? styles.starWarm
+              : s.tone === 'cool'
+                ? styles.starCool
+                : styles.star
+          const className = s.twinkle
+            ? `${toneClass} ${styles.starTwinkle}`
+            : toneClass
+          return (
+            <circle
+              key={s.id}
+              cx={`${s.cx}%`}
+              cy={`${s.cy}%`}
+              r={s.r}
+              opacity={s.o}
+              className={className}
+              style={
+                s.twinkle
+                  ? { animationDelay: `${s.delay ?? 0}s` }
+                  : undefined
+              }
+            />
+          )
+        })}
       </svg>
       )}
 
