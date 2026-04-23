@@ -14,6 +14,36 @@
   background: var(--vignette-bg);
 }
 
+/* Warm-heroic deep-space wash — only rendered in cinematic mode. A soft
+ * amber pool up top-centre fades through into a cooler blue-grey lower-
+ * right, suggesting distant sunlight and Earth-shadow without competing
+ * with the ship. Layered behind the scene canvas via a lower z-index. */
+.nebula {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(
+      ellipse 80% 55% at 52% 12%,
+      rgba(232, 162, 59, 0.18) 0%,
+      rgba(232, 162, 59, 0.08) 30%,
+      rgba(232, 162, 59, 0) 60%
+    ),
+    radial-gradient(
+      ellipse 70% 60% at 82% 78%,
+      rgba(70, 110, 170, 0.14) 0%,
+      rgba(60, 90, 130, 0.06) 35%,
+      rgba(40, 60, 100, 0) 70%
+    ),
+    radial-gradient(
+      ellipse 110% 95% at 50% 50%,
+      rgba(20, 16, 12, 0) 55%,
+      rgba(0, 0, 0, 0.45) 100%
+    );
+  opacity: 0.85;
+}
+
 .starfield {
   position: absolute;
   inset: 0;
@@ -23,8 +53,22 @@
   height: 100%;
 }
 
+/* Cinematic mode adds more stars at higher visibility so the backdrop
+ * feels populated. Hybrid mode stays sparse (blueprint aesthetic). */
+.starfieldCinematic {
+  opacity: 0.82;
+}
+
 .star {
   fill: var(--color-fg);
+}
+
+.starWarm {
+  fill: #f4d5a0;
+}
+
+.starCool {
+  fill: #c6dcf4;
 }
 
 .scene {

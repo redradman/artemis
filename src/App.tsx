@@ -15,14 +15,40 @@ import { findActivePhaseIndex } from './hooks/useMissionState'
 
 const SCALE_METERS = [0, 25, 50, 75, 100]
 
-const STAR_COUNT = 80
-const STARS = Array.from({ length: STAR_COUNT }, (_, i) => ({
-  id: i,
-  cx: (i * 73) % 100,
-  cy: (i * 131) % 100,
-  r: i % 7 === 0 ? 1.2 : 0.6,
-  o: i % 5 === 0 ? 0.7 : 0.3,
-}))
+// Hybrid keeps a sparse starfield that reads as schematic dotting.
+// Cinematic mode gets a denser field with warm/cool tint variation to
+// sell the deep-space backdrop.
+const HYBRID_STAR_COUNT = 80
+const CINEMATIC_STAR_COUNT = 320
+
+type Star = {
+  id: number
+  cx: number
+  cy: number
+  r: number
+  o: number
+  tone: 'neutral' | 'warm' | 'cool'
+}
+
+function generateStars(count: number): Star[] {
+  return Array.from({ length: count }, (_, i) => {
+    // Pseudo-random but deterministic — same stars each reload.
+    const toneRoll = (i * 37) % 10
+    const tone: Star['tone'] =
+      toneRoll < 2 ? 'warm' : toneRoll < 4 ? 'cool' : 'neutral'
+    return {
+      id: i,
+      cx: (i * 73) % 100,
+      cy: (i * 131) % 100,
+      r: i % 9 === 0 ? 1.35 : i % 5 === 0 ? 0.9 : 0.55,
+      o: i % 5 === 0 ? 0.75 : i % 3 === 0 ? 0.45 : 0.28,
+      tone,
+    }
+  })
+}
+
+const HYBRID_STARS = generateStars(HYBRID_STAR_COUNT)
+const CINEMATIC_STARS = generateStars(CINEMATIC_STAR_COUNT)
 
 function ScaleReference() {
   const projections = useProjectionStore((s) => s.projections)
@@ -81,6 +107,9 @@ function App() {
   const activeComponent = useMissionStore((s) => s.activeComponent)
   const setActiveComponent = useMissionStore((s) => s.setActiveComponent)
   const setAutoRotate = useMissionStore((s) => s.setAutoRotate)
+  const renderMode = useMissionStore((s) => s.renderMode)
+  const cinematic = renderMode === 'cinematic'
+  const stars = cinematic ? CINEMATIC_STARS : HYBRID_STARS
 
   const visibility = useMemo(() => {
     const map: Record<string, boolean> = {}
@@ -137,15 +166,25 @@ function App() {
       </div>
 
       <div className={styles.vignette} />
-      <svg className={styles.starfield} aria-hidden="true">
-        {STARS.map((s) => (
+      {cinematic && <div className={styles.nebula} aria-hidden="true" />}
+      <svg
+        className={`${styles.starfield}${cinematic ? ` ${styles.starfieldCinematic}` : ''}`}
+        aria-hidden="true"
+      >
+        {stars.map((s) => (
           <circle
             key={s.id}
             cx={`${s.cx}%`}
             cy={`${s.cy}%`}
             r={s.r}
             opacity={s.o}
-            className={styles.star}
+            className={
+              s.tone === 'warm'
+                ? styles.starWarm
+                : s.tone === 'cool'
+                  ? styles.starCool
+                  : styles.star
+            }
           />
         ))}
       </svg>
