@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import styles from './App.module.css'
 import { Chrome } from './components/Chrome/Chrome'
+import { ZoomControls } from './components/Chrome/ZoomControls'
 import { Timeline } from './components/Timeline/Timeline'
 import { Labels } from './components/Labels/Labels'
 import { InfoPanel } from './components/InfoPanel/InfoPanel'
@@ -267,6 +268,8 @@ function App() {
       <InfoPanel />
 
       <Chrome />
+
+      <ZoomControls />
 
       <Timeline />
 

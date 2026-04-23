@@ -1,6 +1,6 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
-import { Canvas } from '@react-three/fiber'
+import { Canvas, useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei/core/OrbitControls.js'
 import { Rocket } from './Rocket'
 import { Projector } from '../../hooks/useProjectedPoints'
@@ -88,6 +88,38 @@ function CameraRig({
   return null
 }
 
+// Listens for window "artemis:zoom" events (dispatched by the HUD zoom
+// buttons) and dollies the camera toward/away from the orbit target. A
+// window event is the cleanest bridge across the Canvas reconciler
+// boundary without threading a global ref through React.
+function ZoomListener({
+  controlsRef,
+}: {
+  controlsRef: React.RefObject<OrbitControlsRef | null>
+}) {
+  const camera = useThree((s) => s.camera)
+
+  useEffect(() => {
+    const onZoom = (e: Event) => {
+      const direction = (e as CustomEvent<{ direction: 'in' | 'out' }>).detail
+        ?.direction
+      const controls = controlsRef.current
+      if (!direction || !controls) return
+      const factor = direction === 'in' ? 0.78 : 1.28
+      const target = controls.target
+      const offset = camera.position.clone().sub(target)
+      const newLen = Math.max(18, Math.min(380, offset.length() * factor))
+      offset.setLength(newLen)
+      camera.position.copy(target).add(offset)
+      controls.update()
+    }
+    window.addEventListener('artemis:zoom', onZoom as EventListener)
+    return () => window.removeEventListener('artemis:zoom', onZoom as EventListener)
+  }, [camera, controlsRef])
+
+  return null
+}
+
 export function ArtemisIIScene() {
   const rocketRef = useRef<THREE.Group>(null)
   const controlsRef = useRef<OrbitControlsRef>(null)
@@ -142,6 +174,7 @@ export function ArtemisIIScene() {
         autoRotateSpeed={0.6}
       />
       <CameraRig controlsRef={controlsRef} rocketRef={rocketRef} />
+      <ZoomListener controlsRef={controlsRef} />
     </Canvas>
   )
 }
