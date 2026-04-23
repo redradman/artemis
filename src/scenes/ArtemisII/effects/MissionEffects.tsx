@@ -13,6 +13,7 @@ import type { MissionStageState } from '../lib/stateAt'
 type MissionEffectsProps = {
   state: MissionStageState
   cinematic: boolean
+  isPlaying: boolean
 }
 
 // Emitter sits just below the cinematic engine-bell bottom (bell bottom
@@ -113,15 +114,22 @@ function isSmallViewport(): boolean {
   return window.matchMedia(SMALL_VIEWPORT_QUERY).matches
 }
 
-export function MissionEffects({ state, cinematic }: MissionEffectsProps) {
+export function MissionEffects({ state, cinematic, isPlaying }: MissionEffectsProps) {
   const { stages, solarDeploy, effects } = state
 
-  const rs25On = stages.core.visible ? effects.rs25 : 0
-  const srbOnL = stages.srbL.visible ? effects.srb : 0
-  const srbOnR = stages.srbR.visible ? effects.srb : 0
-  const rl10On = stages.icps.visible ? Math.max(effects.rl10Prm, effects.rl10Arb) : 0
-  const esmOn = stages.sm.visible ? effects.esmMain : 0
-  const lasJettOn = stages.las.visible ? effects.lasJett : 0
+  // Engine ignition (plumes + bloom halos) is suppressed while the
+  // timeline is paused — a stationary rocket with a burning engine reads
+  // as "broken." Non-thrust effects (separation motors, parachutes,
+  // re-entry plasma, RCS) are left alone because they're tied to discrete
+  // mission events the user may want to inspect while scrubbed.
+  const engineGate = isPlaying ? 1 : 0
+  const rs25On = (stages.core.visible ? effects.rs25 : 0) * engineGate
+  const srbOnL = (stages.srbL.visible ? effects.srb : 0) * engineGate
+  const srbOnR = (stages.srbR.visible ? effects.srb : 0) * engineGate
+  const rl10On =
+    (stages.icps.visible ? Math.max(effects.rl10Prm, effects.rl10Arb) : 0) * engineGate
+  const esmOn = (stages.sm.visible ? effects.esmMain : 0) * engineGate
+  const lasJettOn = (stages.las.visible ? effects.lasJett : 0) * engineGate
   const cmsmSepOn = stages.sm.visible ? effects.cmsmSep : 0
   const rcsActiveOn = stages.sm.visible ? effects.rcsBurst : 0
 

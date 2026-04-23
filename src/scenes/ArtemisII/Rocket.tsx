@@ -40,6 +40,7 @@ export function Rocket({ ref }: RocketProps) {
   const { stages, solarDeploy, orientation } = state
   const renderMode = useMissionStore((s) => s.renderMode)
   const activeComponent = useMissionStore((s) => s.activeComponent)
+  const isPlaying = useMissionStore((s) => s.isPlaying)
   const cinematic = renderMode === 'cinematic'
 
   return (
@@ -107,7 +108,7 @@ export function Rocket({ ref }: RocketProps) {
         </ClickableModule>
         {cinematic && <CinematicShell state={state} />}
         {!cinematic && <HybridDetails state={state} />}
-        <MissionEffects state={state} cinematic={cinematic} />
+        <MissionEffects state={state} cinematic={cinematic} isPlaying={isPlaying} />
         <SelectionHighlight
           state={state}
           activeId={activeComponent}
