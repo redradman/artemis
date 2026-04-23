@@ -10,6 +10,7 @@ import { LaunchAbortSystem } from './parts/LaunchAbortSystem'
 import { ServiceModule } from './parts/ServiceModule'
 import { SolidRocketBooster } from './parts/SolidRocketBooster'
 import { MissionEffects } from './effects/MissionEffects'
+import { CapsulePendulum } from './effects/CapsulePendulum'
 
 type RocketProps = {
   ref?: Ref<THREE.Group>
@@ -82,13 +83,15 @@ export function Rocket({ ref }: RocketProps) {
         >
           <ServiceModule solarDeploy={solarDeploy} />
         </ClickableModule>
-        <ClickableModule
-          id="crew-module"
-          collider={COLLIDERS.crew}
-          position={[stages.crew.offsetX, stages.crew.offsetY, stages.crew.offsetZ]}
-        >
-          <CrewModule />
-        </ClickableModule>
+        <CapsulePendulum intensity={state.effects.parachutes} pivotY={56.2}>
+          <ClickableModule
+            id="crew-module"
+            collider={COLLIDERS.crew}
+            position={[stages.crew.offsetX, stages.crew.offsetY, stages.crew.offsetZ]}
+          >
+            <CrewModule />
+          </ClickableModule>
+        </CapsulePendulum>
         <ClickableModule
           id="launch-abort"
           collider={COLLIDERS.las}
