@@ -15,13 +15,20 @@ import { useMissionStore } from '../../store/missionStore'
 function CinematicLights() {
   return (
     <>
-      <ambientLight intensity={0.32} color={0xfff4dc} />
+      <ambientLight intensity={0.3} color={0xfff4dc} />
       {/* Warm key light, upper-right front */}
-      <directionalLight position={[80, 120, 140]} intensity={1.1} color={0xfff0d4} />
-      {/* Cool fill, lower-left back — fills shadows and gives a subtle rim */}
-      <directionalLight position={[-100, -40, -80]} intensity={0.35} color={0x99b8d8} />
-      {/* Amber underlight — hints at Earth-glow / engine wash on the underside */}
-      <directionalLight position={[0, -90, 30]} intensity={0.4} color={0xe8a23b} />
+      <directionalLight position={[80, 120, 140]} intensity={1.05} color={0xfff0d4} />
+      {/* Cool fill, lower-left back — fills shadows and softens the scene */}
+      <directionalLight position={[-100, -40, -80]} intensity={0.3} color={0x99b8d8} />
+      {/* Amber underlight — Earth-glow / engine wash on the underside */}
+      <directionalLight position={[0, -90, 30]} intensity={0.35} color={0xe8a23b} />
+      {/* Rear amber rim — sits behind the ship relative to the default
+          camera (camera near (+x, +z)), so it catches the far silhouette
+          in warm trim. */}
+      <directionalLight position={[-160, 40, -220]} intensity={0.65} color={0xf4a33a} />
+      {/* Cool top-back kicker — gives the nose a faint cold specular
+          against the warm key. */}
+      <directionalLight position={[40, 180, -120]} intensity={0.35} color={0x9cb6d6} />
     </>
   )
 }
