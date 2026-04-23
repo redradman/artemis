@@ -5,6 +5,19 @@
   color: var(--color-fg);
   font-family: var(--font-mono);
   overflow: hidden;
+  /* Theme crossfade — picking a theme should feel atmospheric, not like
+   * flipping a switch. Cross-fades background + foreground in tandem. */
+  transition:
+    background-color var(--motion-duration-theme) var(--motion-ease-standard),
+    color var(--motion-duration-theme) var(--motion-ease-standard);
+}
+
+/* Fade the scene backdrop colour alongside the root so the theme swap
+ * reads as one gesture. (background-image can't be transitioned — CSS
+ * swaps layered images instantly — so the grid/noise layers just pop in
+ * when blueprint class is applied; the colour fade softens the seam.) */
+.scene {
+  transition: background-color var(--motion-duration-theme) var(--motion-ease-standard);
 }
 
 .vignette {
