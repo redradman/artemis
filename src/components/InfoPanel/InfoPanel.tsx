@@ -22,6 +22,7 @@ function splitPurpose(text: string): { lede: string; body: string | null } {
 export function InfoPanel() {
   const activeId = useMissionStore((s) => s.activeComponent)
   const clear = useMissionStore((s) => s.setActiveComponent)
+  const cinematic = useMissionStore((s) => s.renderMode === 'cinematic')
 
   const current = activeId ? components.find((c) => c.id === activeId) : null
   const [lastDisplayed, setLastDisplayed] = useState<RocketComponent | null>(
@@ -42,9 +43,17 @@ export function InfoPanel() {
 
   const purpose = displayed ? splitPurpose(displayed.info.purpose) : null
 
+  const panelClassName = [
+    styles.panel,
+    isOpen ? styles.open : '',
+    cinematic ? styles.panelCinematic : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
   return (
     <aside
-      className={isOpen ? `${styles.panel} ${styles.open}` : styles.panel}
+      className={panelClassName}
       aria-hidden={!isOpen}
       aria-labelledby={displayed ? `info-panel-${displayed.id}` : undefined}
     >

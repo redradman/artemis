@@ -23,6 +23,23 @@
   pointer-events: auto;
 }
 
+/* Cinematic mode: warmer accented frame + amber corner glow to match the
+ * golden-hour mood of the rest of the cinematic scene. The background
+ * tint leans very slightly warm; the border picks up the amber accent. */
+.panelCinematic {
+  background:
+    linear-gradient(180deg, rgba(40, 28, 14, 0.88), rgba(6, 4, 2, 0.92));
+  border-color: rgba(232, 162, 59, 0.6);
+}
+
+.panelCinematic .kicker {
+  color: rgba(244, 185, 92, 0.75);
+}
+
+.panelCinematic .name {
+  color: var(--color-accent);
+}
+
 .header {
   display: flex;
   justify-content: space-between;
