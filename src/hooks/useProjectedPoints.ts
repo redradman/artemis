@@ -44,6 +44,13 @@ export type ProjectionTarget = {
    * the model surface.
    */
   skipFacing?: boolean
+  /**
+   * When true, the target's `point` is interpreted in world space and the
+   * parentRef's matrix is not applied. Used by fixed scene rigging like
+   * the altitude scale ticks, which should stay vertical even when the
+   * rocket group itself is rotated for keyed banking.
+   */
+  skipParent?: boolean
 }
 
 type ProjectorProps = {
@@ -83,7 +90,7 @@ export function Projector({
     const out: Record<string, Projection> = {}
     for (const t of targets) {
       worldVec.copy(t.point)
-      if (parent) worldVec.applyMatrix4(parent.matrixWorld)
+      if (parent && !t.skipParent) worldVec.applyMatrix4(parent.matrixWorld)
       projectedVec.copy(worldVec).project(camera)
       const onScreen = projectedVec.z <= 1 && projectedVec.z >= -1
 

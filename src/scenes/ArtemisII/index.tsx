@@ -20,14 +20,17 @@ const MODEL_CENTER = new THREE.Vector3(0, 1.5, 0)
 
 // Scale-reference targets. The rocket geometry spans world y -7 → 66 (73 units)
 // representing 0 → 98.1 m. Scale = 73/98.1 = 0.744 units per metre. These
-// project to screen each frame so the scale ref tracks camera zoom/orbit.
+// are anchored in WORLD space (skipParent) so that keyed banking, which
+// rotates the rocket group about the camera target, doesn't drag the scale
+// ticks along with it. The scale stays vertical regardless of ship attitude.
 const SCALE_HEIGHTS_M = [0, 25, 50, 75, 100]
 const SCALE_UNITS_PER_M = 73 / 98.1
-const SCALE_Y_BASE = -7
+const SCALE_Y_BASE_WORLD = -35 // original rocket-local -7 + group translation -28
 const SCALE_TARGETS = SCALE_HEIGHTS_M.map((m) => ({
   id: `scale:${m}`,
-  point: new THREE.Vector3(0, SCALE_Y_BASE + m * SCALE_UNITS_PER_M, 0),
+  point: new THREE.Vector3(0, SCALE_Y_BASE_WORLD + m * SCALE_UNITS_PER_M, 0),
   skipFacing: true,
+  skipParent: true,
 }))
 
 type OrbitControlsRef = React.ComponentRef<typeof OrbitControls>
