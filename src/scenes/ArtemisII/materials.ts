@@ -23,3 +23,30 @@ export const wireAccent = new THREE.LineBasicMaterial({
   opacity: 0.95,
   fog: true,
 })
+
+// Amber (--color-accent #e8a23b). Reserved for active-state visualisation:
+// thrust plumes, separation motors, entry plasma, deploying solar arrays.
+// Each logical effect clones the material so per-frame opacity writes don't
+// stomp other effects that share the same base colour.
+export const wireActive = new THREE.LineBasicMaterial({
+  color: 0xe8a23b,
+  transparent: true,
+  opacity: 0.9,
+  fog: true,
+})
+
+export const wireActiveDim = new THREE.LineBasicMaterial({
+  color: 0xe8a23b,
+  transparent: true,
+  opacity: 0.4,
+  fog: true,
+})
+
+export const wireActiveDashed = new THREE.LineDashedMaterial({
+  color: 0xe8a23b,
+  transparent: true,
+  opacity: 0.85,
+  dashSize: 0.3,
+  gapSize: 0.15,
+  fog: true,
+})
