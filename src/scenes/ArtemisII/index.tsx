@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { Canvas, useThree, useFrame as useFrameHook } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei/core/OrbitControls.js'
+import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { Rocket } from './Rocket'
 import { Projector } from '../../hooks/useProjectedPoints'
 import { useCameraFlyTo } from '../../hooks/useCameraFlyTo'
@@ -306,6 +307,21 @@ export function ArtemisIIScene() {
       <ZoomListener controlsRef={controlsRef} />
       <CameraDrama controlsRef={controlsRef} />
       <AutoRotateBreath controlsRef={controlsRef} />
+      {/* Bloom on bright emissive surfaces — thrust plumes, entry
+          plasma, RCS puffs — only in cinematic mode. The wireframe
+          modes must look identical to before, so the composer is only
+          mounted when cinematic is active. Kept as the last Canvas
+          child so it sees the fully-populated scene each frame. */}
+      {cinematic && (
+        <EffectComposer>
+          <Bloom
+            luminanceThreshold={0.6}
+            luminanceSmoothing={0.4}
+            intensity={0.9}
+            mipmapBlur
+          />
+        </EffectComposer>
+      )}
     </Canvas>
   )
 }
