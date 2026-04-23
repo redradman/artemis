@@ -30,57 +30,58 @@ export function stateAt(t: number): MissionStageState {
   else if (t < 0.56) engineGlow = 0
   else if (t < 0.72) engineGlow = 0.6
 
-  // SRB separation at t=0.14, fully gone by t=0.2
-  if (t > 0.14) {
-    const sep = Math.min(1, (t - 0.14) / 0.05)
+  // SRB separation aligned with phases.ts SRB SEP at t=0.08.
+  if (t > 0.08) {
+    const sep = Math.min(1, (t - 0.08) / 0.05)
     const eased = easeOutCubic(sep)
     stages.srbL.offsetX = -eased * 25
     stages.srbR.offsetX = eased * 25
     stages.srbL.offsetY = -eased * 10
     stages.srbR.offsetY = -eased * 10
-    if (t > 0.2) {
+    if (t > 0.13) {
       stages.srbL.visible = false
       stages.srbR.visible = false
     }
   }
 
-  // LAS jettison at t=0.21
-  if (t > 0.21) {
-    const sep = Math.min(1, (t - 0.21) / 0.04)
+  // LAS jettison aligned with phases.ts LAS JETT at t=0.14.
+  if (t > 0.14) {
+    const sep = Math.min(1, (t - 0.14) / 0.04)
     const eased = easeOutCubic(sep)
     stages.las.offsetY = eased * 20
     stages.las.offsetX = eased * 8
-    if (t > 0.26) stages.las.visible = false
+    if (t > 0.18) stages.las.visible = false
   }
 
-  // Core stage separation at t=0.36
-  if (t > 0.36) {
-    const sep = Math.min(1, (t - 0.36) / 0.06)
+  // Core stage drops from ICPS/Orion at phases.ts ICPS SEP t=0.24.
+  if (t > 0.24) {
+    const sep = Math.min(1, (t - 0.24) / 0.05)
     const eased = easeOutCubic(sep)
     stages.core.offsetY = -eased * 25
-    if (t > 0.44) stages.core.visible = false
+    if (t > 0.29) stages.core.visible = false
   }
 
-  // ICPS separation at t=0.72
-  if (t > 0.72) {
-    const sep = Math.min(1, (t - 0.72) / 0.05)
+  // Orion separates from ICPS at phases.ts PROX OPS t=0.42.
+  if (t > 0.42) {
+    const sep = Math.min(1, (t - 0.42) / 0.05)
     const eased = easeOutCubic(sep)
     stages.icps.offsetY = -eased * 18
-    if (t > 0.79) stages.icps.visible = false
+    if (t > 0.48) stages.icps.visible = false
   }
 
-  // Solar arrays deploy at t=0.72
+  // Solar arrays deploy shortly after Orion/ICPS separation so the
+  // spacecraft can begin generating its own power.
   let solarDeploy = 0
-  if (t > 0.72) {
-    solarDeploy = Math.min(1, (t - 0.72) / 0.08)
+  if (t > 0.44) {
+    solarDeploy = Math.min(1, (t - 0.44) / 0.08)
   }
 
-  // Service module jettisoned at reentry t=0.97
-  if (t > 0.97) {
-    const sep = Math.min(1, (t - 0.97) / 0.03)
+  // Service module jettisoned at CM/SM SEP t=0.92, gone before entry t=0.96.
+  if (t > 0.92) {
+    const sep = Math.min(1, (t - 0.92) / 0.03)
     const eased = easeOutCubic(sep)
     stages.sm.offsetY = -eased * 15
-    if (t > 0.99) stages.sm.visible = false
+    if (t > 0.95) stages.sm.visible = false
   }
 
   return { stages, solarDeploy, engineGlow }
