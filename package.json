@@ -13,9 +13,10 @@
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
+  "packageManager": "pnpm@10.6.2",
   "engines": {
     "node": ">=22",
-    "pnpm": ">=10"
+    "pnpm": ">=9"
   },
   "dependencies": {
     "@fontsource/jetbrains-mono": "^5.2.8",
