@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo } from 'react'
 import styles from './App.module.css'
 import { Chrome } from './components/Chrome/Chrome'
+import { MobileNotice } from './components/Chrome/MobileNotice'
 import { Timeline } from './components/Timeline/Timeline'
 import { Labels } from './components/Labels/Labels'
 import { InfoPanel } from './components/InfoPanel/InfoPanel'
@@ -305,6 +306,8 @@ function App() {
       <InfoPanel />
 
       <Chrome />
+
+      <MobileNotice />
 
       <Timeline />
     </main>
