@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type PlaybackSpeed = 1 | 2 | 5
+export type PlaybackSpeed = 1 | 2 | 3 | 5
 export type RenderMode = 'hybrid' | 'cinematic'
 
 const prefersReducedMotion =

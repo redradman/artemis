@@ -6,7 +6,7 @@ import { useMissionStore } from '../../store/missionStore'
 import { useMissionState } from '../../hooks/useMissionState'
 import type { PlaybackSpeed } from '../../store/missionStore'
 
-const SPEEDS: readonly PlaybackSpeed[] = [1, 2, 5] as const
+const SPEEDS: readonly PlaybackSpeed[] = [1, 2, 3, 5] as const
 
 type LabelAnchor = 'left' | 'center' | 'right'
 type LabelSide = 'above' | 'below'
