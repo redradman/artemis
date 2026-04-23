@@ -8,6 +8,7 @@ import { ICPS } from './parts/ICPS'
 import { LaunchAbortSystem } from './parts/LaunchAbortSystem'
 import { ServiceModule } from './parts/ServiceModule'
 import { SolidRocketBooster } from './parts/SolidRocketBooster'
+import { MissionEffects } from './effects/MissionEffects'
 
 type RocketProps = {
   ref?: Ref<THREE.Group>
@@ -83,6 +84,7 @@ export function Rocket({ ref }: RocketProps) {
       >
         <LaunchAbortSystem />
       </ClickableModule>
+      <MissionEffects state={state} />
     </group>
   )
 }
