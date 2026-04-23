@@ -65,6 +65,15 @@
   --panel-border: rgba(240, 235, 224, 0.12);
   --panel-blur: 12px;
 
+  /* Heavy / strong / chip panel fills used by the Timeline wrap, the phase
+   * popover, ZoomControls and InfoPanel. Defaults match the pre-theme
+   * black-translucent look so space and cinematic themes are unchanged;
+   * blueprint overrides them to navy below. */
+  --panel-bg-heavy: rgba(0, 0, 0, 0.75);
+  --panel-bg-strong: rgba(0, 0, 0, 0.9);
+  --panel-bg-chip: rgba(0, 0, 0, 0.25);
+  --panel-bg-info: rgba(0, 0, 0, 0.82);
+
   /* Vignette kept neutral (no amber wash) so the white wireframe reads cool,
    * not warm. Retained bottom dimmer for weight. */
   --vignette-bg:
