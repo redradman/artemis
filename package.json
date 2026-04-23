@@ -21,6 +21,7 @@
     "@fontsource/jetbrains-mono": "^5.2.8",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.0",
+    "posthog-js": "^1.370.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "serve": "^14.2.6",
