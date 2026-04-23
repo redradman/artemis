@@ -44,8 +44,11 @@ export const useMissionStore = create<MissionState>((set) => ({
     }),
   togglePlay: () =>
     set((s) => {
-      if (!s.isPlaying && s.currentT >= 1) return { isPlaying: true, currentT: 0 }
-      return { isPlaying: !s.isPlaying }
+      if (!s.isPlaying && s.currentT >= 1) return { isPlaying: true, currentT: 0, autoRotate: false }
+      // Starting playback disables auto-rotate so the mission's own keyed
+      // banking can carry the motion without fighting a constant orbit.
+      if (!s.isPlaying) return { isPlaying: true, autoRotate: false }
+      return { isPlaying: false }
     }),
   setSpeed: (playbackSpeed) => set({ playbackSpeed }),
   setActiveComponent: (activeComponent) => set({ activeComponent }),
