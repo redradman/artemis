@@ -3,9 +3,9 @@ import { useMissionStore } from '../../store/missionStore'
 import type { RenderMode } from '../../store/missionStore'
 
 const THEMES: ReadonlyArray<{ id: RenderMode; label: string }> = [
+  { id: 'blueprint', label: 'BLUEPRINT' },
   { id: 'space', label: 'SPACE' },
   { id: 'cinematic', label: 'CINEMATIC' },
-  { id: 'blueprint', label: 'BLUEPRINT' },
 ]
 
 export function ThemeSwitcher() {

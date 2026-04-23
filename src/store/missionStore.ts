@@ -46,7 +46,7 @@ export const useMissionStore = create<MissionState>((set) => ({
   resumeOnPanelClose: false,
   autoRotate: !prefersReducedMotion,
   showLabels: true,
-  renderMode: 'space',
+  renderMode: 'blueprint',
   cameraResetNonce: 0,
   setTime: (t) =>
     set(() => {
@@ -101,7 +101,7 @@ export const useMissionStore = create<MissionState>((set) => ({
       resumeOnPanelClose: false,
       autoRotate: !prefersReducedMotion,
       showLabels: true,
-      renderMode: 'space',
+      renderMode: 'blueprint',
       playbackSpeed: 1,
       cameraResetNonce: s.cameraResetNonce + 1,
     })),

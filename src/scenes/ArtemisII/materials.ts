@@ -172,6 +172,12 @@ export function applyWirePalette(
   wireActiveDashed.color.setHex(p.active)
 }
 
+// Apply the blueprint palette at module load so the first Canvas frame
+// already has the right colours — otherwise there's a flash of white
+// wires against navy on the initial paint. Kept in sync with the
+// missionStore's default renderMode ('blueprint').
+applyWirePalette('blueprint')
+
 export type ToneMaterials = {
   main: THREE.LineBasicMaterial
   mesh: THREE.LineBasicMaterial
