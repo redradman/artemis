@@ -96,15 +96,22 @@ export function Projector({
 
       let facing = true
       if (!t.skipFacing && modelCenter) {
-        // Facing test in the XZ plane (horizontal) only — the rocket is
-        // essentially cylindrical, so an anchor's vertical offset shouldn't
-        // decide visibility. A negative dot product means the anchor is
-        // behind the model from the camera's point of view; we only hide
-        // when it's *clearly* behind (cos(θ) < -0.35 ≈ > 110° off-axis) so
-        // grazing-angle anchors (booster side faces, off-centre panels)
-        // stay labelled even at default orbit.
-        toAnchor.set(worldVec.x - modelCenter.x, 0, worldVec.z - modelCenter.z)
-        toCamera.set(camPos.x - modelCenter.x, 0, camPos.z - modelCenter.z)
+        // Full 3D facing test. The earlier horizontal-only test handled
+        // yaw fine but failed once keyed banking introduced heavy pitch
+        // — a label anchored near the base of a pitched-over rocket
+        // stayed "facing" even when it had rotated behind the spacecraft.
+        // The 3D dot catches those cases. Threshold kept at cos(θ) >
+        // -0.35 so grazing-angle anchors still render.
+        toAnchor.set(
+          worldVec.x - modelCenter.x,
+          worldVec.y - modelCenter.y,
+          worldVec.z - modelCenter.z,
+        )
+        toCamera.set(
+          camPos.x - modelCenter.x,
+          camPos.y - modelCenter.y,
+          camPos.z - modelCenter.z,
+        )
         const anchorDist = toAnchor.length()
         if (anchorDist <= modelRadius) {
           facing = true
