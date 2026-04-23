@@ -18,8 +18,16 @@ body,
   overflow: hidden;
 }
 
+/* Paint both html and body with the theme-aware scene background so iOS
+ * Safari's overscroll zone and the area behind the overlaid address bar
+ * keep the blueprint navy (or the black backdrop in space/cinematic)
+ * rather than revealing a black gap beneath the timeline. */
+html {
+  background: var(--scene-bg);
+}
+
 body {
-  background: var(--color-bg);
+  background: var(--scene-bg);
   color: var(--color-fg);
   font-family: var(--font-mono);
   font-weight: 400;

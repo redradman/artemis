@@ -207,6 +207,10 @@ function App() {
   // so the colour mutation lands before the browser paints the frame.
   useLayoutEffect(() => {
     applyWirePalette(renderMode)
+    // Mirror the theme onto <html> so theme-scoped CSS vars (especially
+    // --scene-bg) cascade to html/body, which in turn paints iOS Safari's
+    // overscroll zone and the strip behind the overlaid address bar.
+    document.documentElement.dataset.theme = renderMode
   }, [renderMode])
 
   useEffect(() => {
