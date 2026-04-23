@@ -76,7 +76,8 @@
     </script>
   </head>
   <body>
-    <div id="root">
+    <div id="root"></div>
+    <noscript>
       <main>
         <h1>Artemis II — NASA's return to the Moon</h1>
         <p>
@@ -96,20 +97,18 @@
           <li>Component explorer with info panels for every major element of the SLS and Orion stack.</li>
           <li>Toggleable labels identifying each part of the vehicle.</li>
           <li>Cinematic mode with a guided camera tour.</li>
-          <li>Hybrid view blending the annotated diagram with the cinematic presentation.</li>
+          <li>Blueprint and space themed visualisations of the SLS / Orion stack.</li>
         </ul>
+        <p>
+          This interactive experience requires JavaScript and a WebGL-capable
+          browser. Please enable JavaScript to launch the 3D viewer.
+        </p>
         <p>
           Learn more about the mission at
           <a href="https://www.nasa.gov/mission/artemis-ii/">nasa.gov/mission/artemis-ii</a>.
         </p>
-        <noscript>
-          <p>
-            This interactive experience requires JavaScript and a WebGL-capable
-            browser. Please enable JavaScript to launch the 3D viewer.
-          </p>
-        </noscript>
       </main>
-    </div>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
