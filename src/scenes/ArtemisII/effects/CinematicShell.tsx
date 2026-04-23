@@ -143,10 +143,18 @@ const icpsOsa = new THREE.CylinderGeometry(2.31, 2.56, 1.8, 24, 1, false)
 
 const smBody = new THREE.CylinderGeometry(2.31, 2.31, 4, 24, 1, false)
 const smEngine = new THREE.CylinderGeometry(0.26, 0.61, 1, 14, 2, false)
+// Top and bottom seam rings on the service module body — used twice
+// per SmShell render, so a single shared geometry instance prevents
+// per-frame torus allocations.
+const smSeamRing = new THREE.TorusGeometry(2.32, 0.05, 8, 40)
 const rcsQuad = new THREE.BoxGeometry(0.35, 0.45, 0.35)
 
 const solarArm = new THREE.BoxGeometry(0.2, 0.2, 3)
 const solarPanel = new THREE.BoxGeometry(3.8, 0.09, 1.9)
+// Thin strip running along the top edge of each solar panel. Shared
+// across all four wings × three panels (12 instances per frame) — a
+// single module-scope geometry avoids allocating on every render.
+const solarPanelEdge = new THREE.BoxGeometry(3.82, 0.04, 0.1)
 const solarPanelMat = new THREE.MeshPhongMaterial({
   color: 0x1d3b6b,
   shininess: 45,
@@ -414,13 +422,13 @@ function SmShell({
       <mesh geometry={smBody} position={[0, 50.3, 0]} material={m.hull} />
       <mesh geometry={smEngine} position={[0, 47.8, 0]} material={m.nozzle} />
       <mesh
-        geometry={new THREE.TorusGeometry(2.32, 0.05, 8, 40)}
+        geometry={smSeamRing}
         position={[0, 48.3, 0]}
         rotation={[Math.PI / 2, 0, 0]}
         material={seamMat}
       />
       <mesh
-        geometry={new THREE.TorusGeometry(2.32, 0.05, 8, 40)}
+        geometry={smSeamRing}
         position={[0, 52.3, 0]}
         rotation={[Math.PI / 2, 0, 0]}
         material={seamMat}
@@ -459,7 +467,7 @@ function SolarArrays({
               <group key={j} position={[0, 0, 0.9 + j * 2]}>
                 <mesh geometry={solarPanel} material={sm.panel} />
                 <mesh
-                  geometry={new THREE.BoxGeometry(3.82, 0.04, 0.1)}
+                  geometry={solarPanelEdge}
                   position={[0, 0.07, 0]}
                   material={sm.edge}
                 />
