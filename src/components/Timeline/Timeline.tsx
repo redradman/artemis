@@ -195,7 +195,24 @@ export function Timeline() {
             ))}
           </div>
         </div>
-        <div className={styles.statusPhase}>{activePhase.label}</div>
+        <div className={styles.statusPhase}>
+          <span>{activePhase.label}</span>
+          <button
+            type="button"
+            className={`${styles.infoIcon} ${styles.infoIconMajor}`}
+            aria-label={`${activePhase.label} details`}
+            aria-expanded={openPhaseId === activePhase.id}
+            onClick={(e) => {
+              e.stopPropagation()
+              setOpenPhaseId((prev) =>
+                prev === activePhase.id ? null : activePhase.id,
+              )
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            i
+          </button>
+        </div>
       </div>
 
       <div

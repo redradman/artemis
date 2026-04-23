@@ -58,7 +58,10 @@
   color: var(--color-fg);
   flex: 1 1 0;
   min-width: 0;
-  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .playBtn,
