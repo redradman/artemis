@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="manifest" href="/site.webmanifest" />
+    <link rel="canonical" href="https://artemis.radman.dev/" />
     <meta name="theme-color" content="#000000" />
 
     <title>Artemis II — NASA's return to the Moon</title>
@@ -14,7 +15,9 @@
     />
 
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://artemis.radman.dev" />
+    <meta property="og:site_name" content="Artemis II" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://artemis.radman.dev/" />
     <meta property="og:title" content="Artemis II — NASA's return to the Moon" />
     <meta
       property="og:description"
@@ -23,18 +26,89 @@
     <meta property="og:image" content="https://artemis.radman.dev/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Interactive 3D wireframe of the Artemis II Space Launch System and Orion spacecraft."
+    />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://artemis.radman.dev" />
+    <meta name="twitter:url" content="https://artemis.radman.dev/" />
     <meta name="twitter:title" content="Artemis II — NASA's return to the Moon" />
     <meta
       name="twitter:description"
       content="An interactive wireframe of NASA's Artemis II, the first crewed mission to cislunar space since Apollo."
     />
     <meta name="twitter:image" content="https://artemis.radman.dev/og.png" />
+    <meta
+      name="twitter:image:alt"
+      content="Interactive 3D wireframe of the Artemis II Space Launch System and Orion spacecraft."
+    />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Artemis II — NASA's return to the Moon",
+        "url": "https://artemis.radman.dev/",
+        "description": "An interactive 3D wireframe of NASA's Artemis II, the first crewed mission to cislunar space since Apollo. Explore every stage of the Space Launch System and the Orion spacecraft.",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Any (web browser)",
+        "browserRequirements": "Requires a WebGL-capable browser.",
+        "image": "https://artemis.radman.dev/og.png",
+        "inLanguage": "en",
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "author": {
+          "@type": "Person",
+          "name": "Radman",
+          "url": "https://radman.dev"
+        },
+        "about": {
+          "@type": "Thing",
+          "name": "Artemis II",
+          "sameAs": "https://www.nasa.gov/mission/artemis-ii/"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <main>
+        <h1>Artemis II — NASA's return to the Moon</h1>
+        <p>
+          An interactive 3D wireframe of NASA's Artemis II, the first crewed
+          mission to cislunar space since Apollo. Explore every stage of the
+          Space Launch System (SLS) and the Orion spacecraft, from the solid
+          rocket boosters and core stage through the interim cryogenic
+          propulsion stage to the Orion crew and service modules.
+        </p>
+        <p>
+          Built with React, Three.js, and React Three Fiber. Source material is
+          drawn from NASA public-domain documentation.
+        </p>
+        <h2>Features</h2>
+        <ul>
+          <li>Mission timeline stepping through each phase of the Artemis II flight profile.</li>
+          <li>Component explorer with info panels for every major element of the SLS and Orion stack.</li>
+          <li>Toggleable labels identifying each part of the vehicle.</li>
+          <li>Cinematic mode with a guided camera tour.</li>
+          <li>Blueprint and space themed visualisations of the SLS / Orion stack.</li>
+        </ul>
+        <p>
+          This interactive experience requires JavaScript and a WebGL-capable
+          browser. Please enable JavaScript to launch the 3D viewer.
+        </p>
+        <p>
+          Learn more about the mission at
+          <a href="https://www.nasa.gov/mission/artemis-ii/">nasa.gov/mission/artemis-ii</a>.
+        </p>
+      </main>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

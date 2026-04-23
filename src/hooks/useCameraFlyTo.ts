@@ -20,8 +20,13 @@ type Animation = {
 const DURATION_MS = 800
 const SKIP_THRESHOLD = 0.01
 
-function easeOutCubic(t: number): number {
-  return 1 - Math.pow(1 - t, 3)
+// Sub-critically damped curve — tiny overshoot (~3%) past 1 before settling.
+// Reads as weight / inertia rather than a bouncy spring. Tuning c1 lower than
+// the canonical easeOutBack (1.70158) keeps the excursion under 5%.
+function easeOutBackSoft(t: number): number {
+  const c1 = 1.2
+  const c3 = c1 + 1
+  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2)
 }
 
 function prefersReducedMotion(): boolean {
@@ -36,6 +41,7 @@ export function useCameraFlyTo(
   target: THREE.Vector3,
   radius: number,
   parentRef?: RefObject<THREE.Object3D | null>,
+  fixedPos?: THREE.Vector3,
 ) {
   const camera = useThree((s) => s.camera)
   const animRef = useRef<Animation | null>(null)
@@ -54,12 +60,20 @@ export function useCameraFlyTo(
     const fromPos = camera.position.clone()
     const fromTarget = controls.target.clone()
 
-    const offset = fromPos.clone().sub(fromTarget)
-    const dist = offset.length()
-    const dir =
-      dist > 1e-4 ? offset.divideScalar(dist) : new THREE.Vector3(0, 0, 1)
-
-    const toPos = worldTarget.clone().add(dir.multiplyScalar(radius))
+    // When fixedPos is supplied the caller wants an absolute destination
+    // (e.g. RESET restoring the page-load camera angle, not just its
+    // distance). Otherwise preserve the current viewing direction and
+    // just re-radius along it.
+    let toPos: THREE.Vector3
+    if (fixedPos) {
+      toPos = fixedPos.clone()
+    } else {
+      const offset = fromPos.clone().sub(fromTarget)
+      const dist = offset.length()
+      const dir =
+        dist > 1e-4 ? offset.divideScalar(dist) : new THREE.Vector3(0, 0, 1)
+      toPos = worldTarget.clone().add(dir.multiplyScalar(radius))
+    }
 
     if (
       fromPos.distanceTo(toPos) < SKIP_THRESHOLD &&
@@ -84,7 +98,7 @@ export function useCameraFlyTo(
       toTarget: worldTarget,
     }
     controls.enabled = false
-  }, [target, radius, camera, controlsRef, parentRef])
+  }, [target, radius, camera, controlsRef, parentRef, fixedPos])
 
   useFrame(() => {
     const anim = animRef.current
@@ -94,7 +108,7 @@ export function useCameraFlyTo(
 
     const elapsed = performance.now() - anim.start
     const t = Math.min(1, elapsed / DURATION_MS)
-    const k = easeOutCubic(t)
+    const k = easeOutBackSoft(t)
 
     camera.position.lerpVectors(anim.fromPos, anim.toPos, k)
     controls.target.lerpVectors(anim.fromTarget, anim.toTarget, k)

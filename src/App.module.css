@@ -5,6 +5,19 @@
   color: var(--color-fg);
   font-family: var(--font-mono);
   overflow: hidden;
+  /* Theme crossfade — picking a theme should feel atmospheric, not like
+   * flipping a switch. Cross-fades background + foreground in tandem. */
+  transition:
+    background-color var(--motion-duration-theme) var(--motion-ease-standard),
+    color var(--motion-duration-theme) var(--motion-ease-standard);
+}
+
+/* Fade the scene backdrop colour alongside the root so the theme swap
+ * reads as one gesture. (background-image can't be transitioned — CSS
+ * swaps layered images instantly — so the grid/noise layers just pop in
+ * when blueprint class is applied; the colour fade softens the seam.) */
+.scene {
+  transition: background-color var(--motion-duration-theme) var(--motion-ease-standard);
 }
 
 .vignette {
@@ -12,6 +25,7 @@
   inset: 0;
   pointer-events: none;
   background: var(--vignette-bg);
+  animation: appReveal 500ms ease-out 300ms both;
 }
 
 /* Warm-heroic deep-space wash — only rendered in cinematic mode. A soft
@@ -51,6 +65,7 @@
   opacity: 0.5;
   width: 100%;
   height: 100%;
+  animation: appReveal 650ms ease-out 450ms both;
 }
 
 /* Cinematic mode adds more stars at higher visibility so the backdrop
@@ -71,10 +86,104 @@
   fill: #c6dcf4;
 }
 
+/* Randomly-phased twinkle applied to ~8% of stars. Slow enough that it
+ * reads as atmospheric breathing, not winking LEDs. The CSS `opacity`
+ * animation overrides the SVG `opacity` presentation attribute set
+ * inline on each circle. */
+.starTwinkle {
+  animation: starTwinkle 4.5s ease-in-out infinite;
+}
+
+@keyframes starTwinkle {
+  0%, 100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .starTwinkle {
+    animation: none;
+  }
+}
+
 .scene {
   position: absolute;
   inset: 0;
   background: var(--color-bg);
+  /* Scene fades in first. Subsequent elements stagger in behind it, see
+   * the appReveal keyframes below. Using `both` so the 0% state applies
+   * during the (implicit 0ms) delay too. */
+  animation: appReveal 700ms cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+/* Shared reveal keyframe — `from opacity: 0` interpolates up to each
+ * element's natural opacity (no 100% specified, so the pre-animation
+ * computed value wins at 100%). Paired with `animation-fill-mode: both`
+ * so the 0% state holds during any delay. */
+@keyframes appReveal {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes appRevealUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* Reduced-motion users skip the staged reveal entirely — every element
+ * snaps in at full opacity. */
+@media (prefers-reduced-motion: reduce) {
+  .scene,
+  .vignette,
+  .nebula,
+  .starfield,
+  .horizon,
+  .scaleRef {
+    animation: none;
+  }
+}
+
+/* Blueprint backdrop — cyanotype navy with a two-level grid (major 80px,
+ * minor 20px) plus a fiber-grain SVG noise overlay and a soft edge
+ * vignette. The layered look pushes it past "filled rectangle" toward
+ * "cotton paper on a drawing board" without adding heavy textures. */
+.sceneBlueprint {
+  background-color: #0b2e55;
+  background-image:
+    /* soft edge vignette — darker corners, gently lit centre */
+    radial-gradient(
+      ellipse 130% 100% at 50% 50%,
+      rgba(0, 0, 0, 0) 45%,
+      rgba(0, 0, 0, 0.35) 100%
+    ),
+    /* faint warm highlight near top-left so the paper feels lit, not flat */
+    radial-gradient(
+      ellipse 70% 60% at 22% 18%,
+      rgba(210, 225, 255, 0.06) 0%,
+      transparent 55%
+    ),
+    /* paper grain — tiled SVG noise, very low contrast */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/></svg>"),
+    /* major grid, 80px */
+    linear-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.09) 1px, transparent 1px),
+    /* minor grid, 20px */
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    100% 100%,
+    160px 160px,
+    80px 80px,
+    80px 80px,
+    20px 20px,
+    20px 20px;
 }
 
 .horizon {
@@ -87,6 +196,7 @@
   opacity: 0.06;
   pointer-events: none;
   z-index: 1;
+  animation: appReveal 400ms ease-out 650ms both;
 }
 
 .scaleRef {
@@ -97,6 +207,7 @@
   opacity: 0.6;
   pointer-events: none;
   z-index: 2;
+  animation: appReveal 500ms ease-out 700ms both;
 }
 
 .scaleRefLine {

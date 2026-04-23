@@ -2,6 +2,8 @@ import styles from './Chrome.module.css'
 import { mission } from '../../scenes/ArtemisII/data/mission'
 import { useMissionState } from '../../hooks/useMissionState'
 import { useMissionStore } from '../../store/missionStore'
+import { useTweenedNumber } from '../../hooks/useTweenedNumber'
+import { ThemeSwitcher } from './ThemeSwitcher'
 
 type SpecProps = {
   label: string
@@ -22,28 +24,44 @@ function formatMass(tonnes: number): string {
   return `${tonnes.toFixed(1)}t`
 }
 
-function formatHeight(display: string): string {
-  // "98.1 m" → "98m" for compactness in the dense single-line layout.
-  const n = parseFloat(display)
-  if (Number.isFinite(n)) return `${Math.round(n)}m`
-  return display
+function formatHeight(meters: number): string {
+  // Compact: always rounded whole metres for the dense single-line layout.
+  if (!Number.isFinite(meters)) return '—'
+  return `${Math.round(meters)}m`
 }
 
-function formatThrust(display: string): string {
-  // "39.1 MN" → "39MN"
-  return display.replace(/\s+/g, '').replace('MN', 'MN')
+function formatThrust(mn: number): string {
+  // Mirror the display logic from computeStats but tweenable against a
+  // numeric source: MN when ≥1, kN when below, em-dash when zero.
+  if (!Number.isFinite(mn) || mn <= 0) return '—'
+  if (mn >= 1) return `${mn.toFixed(1)}MN`
+  return `${Math.round(mn * 1000)}kN`
+}
+
+// Parse the numeric MN value from the thrust display so we can tween it
+// even though useMissionState only surfaces the pre-formatted string.
+// "39.1 MN" → 39.1, "110 kN" → 0.11, "—" → 0.
+function parseThrustMN(display: string): number {
+  const n = parseFloat(display)
+  if (!Number.isFinite(n)) return 0
+  if (/kN/i.test(display)) return n / 1000
+  return n
 }
 
 export function Chrome() {
   const { stats } = useMissionState()
   const autoRotate = useMissionStore((s) => s.autoRotate)
   const showLabels = useMissionStore((s) => s.showLabels)
-  const renderMode = useMissionStore((s) => s.renderMode)
   const toggleAutoRotate = useMissionStore((s) => s.toggleAutoRotate)
   const toggleLabels = useMissionStore((s) => s.toggleLabels)
-  const toggleRenderMode = useMissionStore((s) => s.toggleRenderMode)
   const reset = useMissionStore((s) => s.reset)
-  const cinematic = renderMode === 'cinematic'
+
+  // Tween the spec numbers so step-changes (SRB SEP / MECO / ICPS SEP / CM-SM
+  // SEP) read as a visible count-down rather than a jump cut. HEIGHT rarely
+  // changes but follows the same path for consistency; CREW is static.
+  const tweenedHeight = useTweenedNumber(stats.heightMeters)
+  const tweenedMass = useTweenedNumber(stats.massTonnes)
+  const tweenedThrust = useTweenedNumber(parseThrustMN(stats.thrustDisplay))
 
   return (
     <div className={styles.top}>
@@ -66,13 +84,14 @@ export function Chrome() {
             DESIGNED BY <span className={styles.creditName}>RADMAN</span>
           </a>
         </div>
+        <ThemeSwitcher />
       </div>
 
       <div className={styles.right}>
         <div className={styles.specs}>
-          <Spec label="HEIGHT" value={formatHeight(stats.heightDisplay)} />
-          <Spec label="MASS" value={formatMass(stats.massTonnes)} />
-          <Spec label="THRUST" value={formatThrust(stats.thrustDisplay)} />
+          <Spec label="HEIGHT" value={formatHeight(tweenedHeight)} />
+          <Spec label="MASS" value={formatMass(tweenedMass)} />
+          <Spec label="THRUST" value={formatThrust(tweenedThrust)} />
           <Spec label="CREW" value="4" />
         </div>
 
@@ -96,17 +115,6 @@ export function Chrome() {
             aria-pressed={showLabels}
           >
             LABELS
-          </button>
-          <button
-            type="button"
-            onClick={toggleRenderMode}
-            className={
-              cinematic ? `${styles.hudBtn} ${styles.hudBtnActive}` : styles.hudBtn
-            }
-            aria-pressed={cinematic}
-            title="Toggle between schematic-hybrid and cinematic VFX modes"
-          >
-            {cinematic ? 'CINEMATIC' : 'HYBRID'}
           </button>
           <button type="button" onClick={reset} className={styles.hudBtn}>
             RESET

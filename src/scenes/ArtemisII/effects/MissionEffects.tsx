@@ -13,6 +13,7 @@ import type { MissionStageState } from '../lib/stateAt'
 type MissionEffectsProps = {
   state: MissionStageState
   cinematic: boolean
+  blueprint: boolean
   isPlaying: boolean
 }
 
@@ -114,7 +115,7 @@ function isSmallViewport(): boolean {
   return window.matchMedia(SMALL_VIEWPORT_QUERY).matches
 }
 
-export function MissionEffects({ state, cinematic, isPlaying }: MissionEffectsProps) {
+export function MissionEffects({ state, cinematic, blueprint, isPlaying }: MissionEffectsProps) {
   const { stages, solarDeploy, effects } = state
 
   // Engine ignition (plumes + bloom halos) is suppressed while the
@@ -164,6 +165,7 @@ export function MissionEffects({ state, cinematic, isPlaying }: MissionEffectsPr
               trailLength={4.0}
               count={rs25Count}
               cinematic={cinematic}
+              blueprint={blueprint}
             />
             <BloomHalo
               position={pos}
@@ -171,6 +173,7 @@ export function MissionEffects({ state, cinematic, isPlaying }: MissionEffectsPr
               baseSize={cinematic ? 4.5 : 2.8}
               phase={i * 0.7}
               cinematic={cinematic}
+              blueprint={blueprint}
             />
           </group>
         ))}
@@ -191,6 +194,7 @@ export function MissionEffects({ state, cinematic, isPlaying }: MissionEffectsPr
             trailLength={6}
             count={srbCount}
             cinematic={cinematic}
+            blueprint={blueprint}
           />
           <BloomHalo
             position={[0, -2.8, 0]}
@@ -198,6 +202,7 @@ export function MissionEffects({ state, cinematic, isPlaying }: MissionEffectsPr
             baseSize={cinematic ? 6 : 3.6}
             phase={0.3}
             cinematic={cinematic}
+            blueprint={blueprint}
           />
         </group>
         <SepMotorPuffs quills={BSM_QUILLS_PER_BOOSTER} intensity={effects.srbSep} />
@@ -218,6 +223,7 @@ export function MissionEffects({ state, cinematic, isPlaying }: MissionEffectsPr
             trailLength={6}
             count={srbCount}
             cinematic={cinematic}
+            blueprint={blueprint}
           />
           <BloomHalo
             position={[0, -2.8, 0]}
@@ -225,6 +231,7 @@ export function MissionEffects({ state, cinematic, isPlaying }: MissionEffectsPr
             baseSize={cinematic ? 6 : 3.6}
             phase={1.4}
             cinematic={cinematic}
+            blueprint={blueprint}
           />
         </group>
         <SepMotorPuffs quills={BSM_QUILLS_PER_BOOSTER} intensity={effects.srbSep} />
@@ -246,12 +253,14 @@ export function MissionEffects({ state, cinematic, isPlaying }: MissionEffectsPr
           trailLength={2.5}
           count={lasJettCount}
           cinematic={cinematic}
+          blueprint={blueprint}
         />
         <BloomHalo
           position={[0, 57.5, 0]}
           intensity={lasJettOn}
           baseSize={cinematic ? 1.8 : 1.2}
           cinematic={cinematic}
+          blueprint={blueprint}
         />
       </group>
 
@@ -270,6 +279,7 @@ export function MissionEffects({ state, cinematic, isPlaying }: MissionEffectsPr
           trailLength={5}
           count={rl10Count}
           cinematic={cinematic}
+          blueprint={blueprint}
         />
         <BloomHalo
           position={[0, 42, 0]}
@@ -277,6 +287,7 @@ export function MissionEffects({ state, cinematic, isPlaying }: MissionEffectsPr
           baseSize={cinematic ? 3.2 : 2}
           pulseFreq={8}
           cinematic={cinematic}
+          blueprint={blueprint}
         />
       </group>
 
@@ -293,6 +304,7 @@ export function MissionEffects({ state, cinematic, isPlaying }: MissionEffectsPr
             trailLength={4.2}
             count={esmCount}
             cinematic={cinematic}
+            blueprint={blueprint}
           />
           <BloomHalo
             position={[0, 47.3, 0]}
@@ -300,6 +312,7 @@ export function MissionEffects({ state, cinematic, isPlaying }: MissionEffectsPr
             baseSize={cinematic ? 2.8 : 1.7}
             pulseFreq={8}
             cinematic={cinematic}
+            blueprint={blueprint}
           />
         </group>
         <SepMotorPuffs
@@ -316,11 +329,13 @@ export function MissionEffects({ state, cinematic, isPlaying }: MissionEffectsPr
         intensity={effects.plasma}
         shieldPosition={[0, 52, 0]}
         cinematic={cinematic}
+        blueprint={blueprint}
       />
       <Parachutes
         intensity={effects.parachutes}
         capsuleTop={[0, 56.2, 0]}
         cinematic={cinematic}
+        blueprint={blueprint}
       />
 
       <SolarArmAccent deploy={solarDeploy} />

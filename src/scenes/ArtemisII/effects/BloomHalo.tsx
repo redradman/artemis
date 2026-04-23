@@ -21,7 +21,13 @@ export type BloomHaloProps = {
   phase?: number
   /** Cinematic mode increases opacity — halos read as more emissive. */
   cinematic?: boolean
+  /** Blueprint mode forces the halo tint toward paper-cyan so no warm
+   * orange bleeds into the cyanotype palette. Overrides `color`. */
+  blueprint?: boolean
 }
+
+// Paper-cyan halo tint used when the blueprint theme is active.
+const BP_HALO = 0xc8e6ff
 
 export function BloomHalo({
   position,
@@ -31,20 +37,22 @@ export function BloomHalo({
   pulseFreq = 14,
   phase = 0,
   cinematic = false,
+  blueprint = false,
 }: BloomHaloProps) {
+  const effectiveColor = blueprint ? BP_HALO : color
   const spriteRef = useRef<THREE.Sprite>(null)
   const tex = useMemo(() => getGlowTexture(), [])
   const mat = useMemo(
     () =>
       new THREE.SpriteMaterial({
         map: tex,
-        color,
+        color: effectiveColor,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
         transparent: true,
         opacity: 0,
       }),
-    [tex, color],
+    [tex, effectiveColor],
   )
 
   /* Per-frame sprite mutation is the intended R3F pattern; the material

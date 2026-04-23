@@ -10,6 +10,7 @@ export type EntryPlasmaProps = {
   /** World-local position of the capsule base (where the heat shield sits). */
   shieldPosition: [number, number, number]
   cinematic?: boolean
+  blueprint?: boolean
 }
 
 // Three nested shock hoops plus a soft additive halo. The hoops ride
@@ -21,6 +22,7 @@ export function EntryPlasma({
   intensity,
   shieldPosition,
   cinematic = false,
+  blueprint = false,
 }: EntryPlasmaProps) {
   const hoopGroupRef = useRef<THREE.Group>(null)
   const materials = useMemo(
@@ -80,6 +82,7 @@ export function EntryPlasma({
           color={0xff9e50}
           pulseFreq={10}
           cinematic={cinematic}
+          blueprint={blueprint}
         />
       </group>
     </group>

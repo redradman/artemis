@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 import { Canvas, useThree, useFrame as useFrameHook } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei/core/OrbitControls.js'
+import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { Rocket } from './Rocket'
 import { Projector } from '../../hooks/useProjectedPoints'
 import { useCameraFlyTo } from '../../hooks/useCameraFlyTo'
@@ -38,6 +39,11 @@ const DEFAULT_TARGET = new THREE.Vector3(0, 1.5, 0)
 // 250u puts the 73-unit-tall rocket at ~58% of viewport height so the
 // bottom timeline wrap never crops the RS-25 skirt on first load.
 const DEFAULT_RADIUS = 250
+// The exact camera pose used on page load. RESET flies back to this
+// absolute position so the ship returns to its original orientation
+// rather than just its original distance along whatever angle the
+// user last rotated to.
+const INITIAL_CAMERA_POSITION = new THREE.Vector3(146.95, 1.5, 202.25)
 
 // World-space centre of the rocket after the group's -28y translation.
 // Matches OrbitControls target; the Projector uses this for the facing test.
@@ -77,16 +83,25 @@ function CameraRig({
       // the selected part is framed with surrounding context instead
       // of filling the viewport edge-to-edge. With the new silhouette
       // highlight the whole outlined stage needs to be visible.
-      if (c) return { target: c.focus.clone(), radius: c.focusRadius * 1.8, local: true }
+      if (c)
+        return {
+          target: c.focus.clone(),
+          radius: c.focusRadius * 1.8,
+          local: true,
+          fixedPos: undefined as THREE.Vector3 | undefined,
+        }
     }
     // Clone DEFAULT_TARGET so each memo pass produces a new reference. That
     // way `cameraResetNonce` participating in the deps is enough to make
     // useCameraFlyTo re-trigger on RESET even though the logical goal is
-    // identical to what it was before the user rotated.
+    // identical to what it was before the user rotated. fixedPos pins the
+    // destination to the exact page-load camera pose so RESET restores the
+    // original orientation, not just the original distance.
     return {
       target: DEFAULT_TARGET.clone(),
       radius: DEFAULT_RADIUS,
       local: false,
+      fixedPos: INITIAL_CAMERA_POSITION.clone() as THREE.Vector3 | undefined,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeComponent, cameraResetNonce])
@@ -96,6 +111,7 @@ function CameraRig({
     goal.target,
     goal.radius,
     goal.local ? rocketRef : undefined,
+    goal.fixedPos,
   )
   return null
 }
@@ -159,6 +175,39 @@ function CameraDrama({
     camera.position.copy(controls.target).add(offset)
     lastAppliedRef.current = target
     controls.update()
+  })
+
+  return null
+}
+
+// Modulates OrbitControls.autoRotateSpeed on a slow sine so the idle
+// spin "breathes" — a specimen floating in a weightless chamber rather
+// than a turntable demo. Only active when auto-rotate is actually on,
+// controls are enabled (not mid fly-to), and nothing is focused; in any
+// other state the speed is left untouched so the constant baseline
+// still applies wherever code elsewhere reads it.
+const AUTO_ROTATE_BASE = 0.6
+const AUTO_ROTATE_AMPLITUDE = 0.18 // 0.42 .. 0.78 around the base
+const AUTO_ROTATE_PERIOD_S = 16
+
+function AutoRotateBreath({
+  controlsRef,
+}: {
+  controlsRef: React.RefObject<OrbitControlsRef | null>
+}) {
+  const tRef = useRef(0)
+
+  useFrameHook((_, delta) => {
+    const controls = controlsRef.current
+    if (!controls) return
+    if (!controls.enabled) return
+    if (useMissionStore.getState().activeComponent) return
+    if (!useMissionStore.getState().autoRotate) return
+
+    tRef.current += delta
+    const phase = (tRef.current / AUTO_ROTATE_PERIOD_S) * Math.PI * 2
+    controls.autoRotateSpeed =
+      AUTO_ROTATE_BASE + Math.sin(phase) * AUTO_ROTATE_AMPLITUDE
   })
 
   return null
@@ -257,6 +306,22 @@ export function ArtemisIIScene() {
       <CameraRig controlsRef={controlsRef} rocketRef={rocketRef} />
       <ZoomListener controlsRef={controlsRef} />
       <CameraDrama controlsRef={controlsRef} />
+      <AutoRotateBreath controlsRef={controlsRef} />
+      {/* Bloom on bright emissive surfaces — thrust plumes, entry
+          plasma, RCS puffs — only in cinematic mode. The wireframe
+          modes must look identical to before, so the composer is only
+          mounted when cinematic is active. Kept as the last Canvas
+          child so it sees the fully-populated scene each frame. */}
+      {cinematic && (
+        <EffectComposer>
+          <Bloom
+            luminanceThreshold={0.6}
+            luminanceSmoothing={0.4}
+            intensity={0.9}
+            mipmapBlur
+          />
+        </EffectComposer>
+      )}
     </Canvas>
   )
 }

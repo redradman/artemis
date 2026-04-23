@@ -53,6 +53,16 @@
   --hairline-faint: 1px solid var(--color-fg-faint);
   --hairline-accent: 1px solid var(--color-accent);
 
+  /* Per-theme motion characters. Components pull from these so each theme
+   * can have its own tempo: blueprint feels crisp and technical, cinematic
+   * heavier and slower, space neutral. Overrides live in the data-theme
+   * blocks below. */
+  --motion-ease-spring: cubic-bezier(0.34, 1.28, 0.64, 1);
+  --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-duration-panel: 420ms;
+  --motion-duration-micro: 240ms;
+  --motion-duration-theme: 420ms;
+
   /* Edge insets scale fluidly with the viewport so the composition reads
    * consistently on narrow aspect ratios and ultrawide monitors. */
   --chrome-pad-x: clamp(14px, 2.4vw, 32px);
@@ -65,9 +75,57 @@
   --panel-border: rgba(240, 235, 224, 0.12);
   --panel-blur: 12px;
 
+  /* Heavy / strong / chip panel fills used by the Timeline wrap, the phase
+   * popover, ZoomControls and InfoPanel. Defaults match the pre-theme
+   * black-translucent look so space and cinematic themes are unchanged;
+   * blueprint overrides them to navy below. */
+  --panel-bg-heavy: rgba(0, 0, 0, 0.75);
+  --panel-bg-strong: rgba(0, 0, 0, 0.9);
+  --panel-bg-chip: rgba(0, 0, 0, 0.25);
+  --panel-bg-info: rgba(0, 0, 0, 0.82);
+
   /* Vignette kept neutral (no amber wash) so the white wireframe reads cool,
    * not warm. Retained bottom dimmer for weight. */
   --vignette-bg:
     radial-gradient(ellipse at 50% 55%, rgba(240, 235, 224, 0.015) 0%, transparent 55%),
     radial-gradient(ellipse at 50% 120%, rgba(240, 235, 224, 0.03) 0%, transparent 60%);
+}
+
+/* Cinematic theme chrome tint — keeps the amber accent and starfield
+ * intact but nudges the translucent panels toward a warm charcoal so the
+ * timeline and info surfaces belong to the same sunlit/amber-rim world
+ * as the lit rocket. Distinct from space (pure neutral black) without
+ * being loud. */
+[data-theme='cinematic'] {
+  --panel-bg-heavy: rgba(18, 12, 6, 0.82);
+  --panel-bg-strong: rgba(18, 12, 6, 0.93);
+  --panel-bg-chip: rgba(18, 12, 6, 0.35);
+  --panel-bg-info: rgba(18, 12, 6, 0.88);
+  --panel-border: rgba(232, 162, 59, 0.12);
+
+  /* Heavier, slower motion grammar — cinematic leans into inertia. */
+  --motion-duration-panel: 520ms;
+  --motion-duration-micro: 300ms;
+}
+
+/* Blueprint theme palette — scoped to [data-theme='blueprint'] on the app
+ * root. Swaps the amber accent for a paper-cyan and re-tints the chrome
+ * panels to navy so they belong on the cyanotype backdrop instead of
+ * reading as dark holes. Space and cinematic themes are untouched. */
+[data-theme='blueprint'] {
+  --color-accent: #8fd2ff;
+  --color-accent-dim: rgba(143, 210, 255, 0.55);
+  --color-accent-wash: rgba(143, 210, 255, 0.10);
+  --color-accent-glow: rgba(143, 210, 255, 0.5);
+
+  --panel-bg: rgba(10, 38, 72, 0.65);
+  --panel-bg-heavy: rgba(10, 38, 72, 0.85);
+  --panel-bg-strong: rgba(10, 38, 72, 0.93);
+  --panel-bg-chip: rgba(10, 38, 72, 0.4);
+  --panel-bg-info: rgba(10, 38, 72, 0.88);
+
+  /* Crisper, more technical motion — blueprint snaps into place like
+   * drafting software, no inertia. */
+  --motion-duration-panel: 320ms;
+  --motion-duration-micro: 180ms;
 }

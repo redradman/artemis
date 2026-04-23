@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import styles from './Timeline.module.css'
 import { phases } from '../../scenes/ArtemisII/data/phases'
 import type { Phase } from '../../scenes/ArtemisII/data/phases'
@@ -93,13 +93,14 @@ export function Timeline() {
   const setTime = useMissionStore((s) => s.setTime)
   const togglePlay = useMissionStore((s) => s.togglePlay)
   const setSpeed = useMissionStore((s) => s.setSpeed)
+  const openPhaseId = useMissionStore((s) => s.openPhaseId)
+  const setOpenPhase = useMissionStore((s) => s.setOpenPhase)
 
   const { activePhase, activePhaseIndex, tplus } = useMissionState()
   const labelLayouts = computeLabelLayouts(phases)
 
   const trackRef = useRef<HTMLDivElement>(null)
   const scrubbingRef = useRef(false)
-  const [openPhaseId, setOpenPhaseId] = useState<string | null>(null)
   const popoverRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const iconRefs = useRef<Record<string, HTMLButtonElement | null>>({})
 
@@ -148,10 +149,10 @@ export function Timeline() {
       const icon = iconRefs.current[openPhaseId]
       if (popover && popover.contains(target)) return
       if (icon && icon.contains(target)) return
-      setOpenPhaseId(null)
+      setOpenPhase(null)
     }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpenPhaseId(null)
+      if (e.key === 'Escape') setOpenPhase(null)
     }
     document.addEventListener('mousedown', onMouseDown)
     document.addEventListener('keydown', onKey)
@@ -159,7 +160,7 @@ export function Timeline() {
       document.removeEventListener('mousedown', onMouseDown)
       document.removeEventListener('keydown', onKey)
     }
-  }, [openPhaseId])
+  }, [openPhaseId, setOpenPhase])
 
   const popoverAnchorClass = (t: number) => {
     if (t < 0.1) return styles.popoverAnchorLeft
@@ -195,7 +196,22 @@ export function Timeline() {
             ))}
           </div>
         </div>
-        <div className={styles.statusPhase}>{activePhase.label}</div>
+        <div className={styles.statusPhase}>
+          <span>{activePhase.label}</span>
+          <button
+            type="button"
+            className={`${styles.infoIcon} ${styles.infoIconMajor}`}
+            aria-label={`${activePhase.label} details`}
+            aria-expanded={openPhaseId === activePhase.id}
+            onClick={(e) => {
+              e.stopPropagation()
+              setOpenPhase(openPhaseId === activePhase.id ? null : activePhase.id)
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            i
+          </button>
+        </div>
       </div>
 
       <div
@@ -287,7 +303,7 @@ export function Timeline() {
                   aria-controls={popoverId}
                   onClick={(e) => {
                     e.stopPropagation()
-                    setOpenPhaseId((prev) => (prev === p.id ? null : p.id))
+                    setOpenPhase(openPhaseId === p.id ? null : p.id)
                   }}
                   onMouseDown={(e) => e.stopPropagation()}
                 >
@@ -304,14 +320,19 @@ export function Timeline() {
                   popoverRef={(el) => {
                     popoverRefs.current[p.id] = el
                   }}
-                  onClose={() => setOpenPhaseId(null)}
+                  onClose={() => setOpenPhase(null)}
                 />
               )}
             </div>
           )
         })}
 
-        <div className={styles.playhead} style={{ left: `${currentT * 100}%` }} />
+        <div
+          className={
+            isPlaying ? `${styles.playhead} ${styles.playheadPlaying}` : styles.playhead
+          }
+          style={{ left: `${currentT * 100}%` }}
+        />
       </div>
     </div>
   )

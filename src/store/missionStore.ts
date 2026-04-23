@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 
 export type PlaybackSpeed = 1 | 2 | 3 | 5
-export type RenderMode = 'hybrid' | 'cinematic'
+export type RenderMode = 'space' | 'cinematic' | 'blueprint'
 
 const prefersReducedMotion =
   typeof window !== 'undefined' &&
@@ -18,6 +18,13 @@ type MissionState = {
    * should resume playback. Cleared once consumed.
    */
   resumeOnPanelClose: boolean
+  /**
+   * Which phase popover is currently open on the mission timeline, or
+   * null if none. Mirrors activeComponent — opening auto-pauses if the
+   * timeline was playing, closing (or hitting play) resumes.
+   */
+  openPhaseId: string | null
+  resumeOnPopoverClose: boolean
   autoRotate: boolean
   showLabels: boolean
   renderMode: RenderMode
@@ -34,7 +41,8 @@ type MissionState = {
   toggleAutoRotate: () => void
   setAutoRotate: (v: boolean) => void
   toggleLabels: () => void
-  toggleRenderMode: () => void
+  setRenderMode: (mode: RenderMode) => void
+  setOpenPhase: (id: string | null) => void
   reset: () => void
 }
 
@@ -44,9 +52,11 @@ export const useMissionStore = create<MissionState>((set) => ({
   playbackSpeed: 1,
   activeComponent: null,
   resumeOnPanelClose: false,
+  openPhaseId: null,
+  resumeOnPopoverClose: false,
   autoRotate: !prefersReducedMotion,
   showLabels: true,
-  renderMode: 'hybrid',
+  renderMode: 'blueprint',
   cameraResetNonce: 0,
   setTime: (t) =>
     set(() => {
@@ -55,25 +65,40 @@ export const useMissionStore = create<MissionState>((set) => ({
     }),
   togglePlay: () =>
     set((s) => {
-      // If the info panel is open when the user hits play, close the
-      // panel and resume playback — motion + panel content fighting for
-      // attention is exactly what the pause-on-click behaviour is meant
-      // to avoid.
-      if (!s.isPlaying && s.activeComponent !== null) {
+      // If any auto-pausing menu (info panel or phase popover) is open
+      // when the user hits play, close it and resume — motion + open
+      // menu content fighting for attention is exactly what the
+      // pause-on-click behaviour is meant to avoid.
+      const hasOpenMenu = s.activeComponent !== null || s.openPhaseId !== null
+      if (!s.isPlaying && hasOpenMenu) {
         return {
           isPlaying: true,
           activeComponent: null,
+          openPhaseId: null,
           resumeOnPanelClose: false,
+          resumeOnPopoverClose: false,
           autoRotate: false,
           ...(s.currentT >= 1 ? { currentT: 0 } : {}),
         }
       }
       if (!s.isPlaying && s.currentT >= 1)
-        return { isPlaying: true, currentT: 0, autoRotate: false, resumeOnPanelClose: false }
+        return {
+          isPlaying: true,
+          currentT: 0,
+          autoRotate: false,
+          resumeOnPanelClose: false,
+          resumeOnPopoverClose: false,
+        }
       // Starting playback disables auto-rotate so the mission's own keyed
       // banking can carry the motion without fighting a constant orbit.
-      if (!s.isPlaying) return { isPlaying: true, autoRotate: false, resumeOnPanelClose: false }
-      return { isPlaying: false, resumeOnPanelClose: false }
+      if (!s.isPlaying)
+        return {
+          isPlaying: true,
+          autoRotate: false,
+          resumeOnPanelClose: false,
+          resumeOnPopoverClose: false,
+        }
+      return { isPlaying: false, resumeOnPanelClose: false, resumeOnPopoverClose: false }
     }),
   setSpeed: (playbackSpeed) => set({ playbackSpeed }),
   setActiveComponent: (activeComponent) =>
@@ -92,17 +117,33 @@ export const useMissionStore = create<MissionState>((set) => ({
   toggleAutoRotate: () => set((s) => ({ autoRotate: !s.autoRotate })),
   setAutoRotate: (autoRotate) => set({ autoRotate }),
   toggleLabels: () => set((s) => ({ showLabels: !s.showLabels })),
-  toggleRenderMode: () =>
-    set((s) => ({ renderMode: s.renderMode === 'hybrid' ? 'cinematic' : 'hybrid' })),
+  setRenderMode: (renderMode) => set({ renderMode }),
+  setOpenPhase: (openPhaseId) =>
+    set((s) => {
+      // Opening a phase popover while playing: auto-pause and remember
+      // to resume when it closes. Closing (via X, click-outside, or
+      // Escape) while we had auto-paused: resume. Other transitions —
+      // e.g. switching from one open popover to another — just update
+      // the id without touching playback.
+      if (openPhaseId !== null && s.openPhaseId === null && s.isPlaying) {
+        return { openPhaseId, isPlaying: false, resumeOnPopoverClose: true }
+      }
+      if (openPhaseId === null && s.resumeOnPopoverClose) {
+        return { openPhaseId: null, isPlaying: true, resumeOnPopoverClose: false }
+      }
+      return { openPhaseId }
+    }),
   reset: () =>
     set((s) => ({
       currentT: 0,
       isPlaying: false,
       activeComponent: null,
       resumeOnPanelClose: false,
+      openPhaseId: null,
+      resumeOnPopoverClose: false,
       autoRotate: !prefersReducedMotion,
       showLabels: true,
-      renderMode: 'hybrid',
+      renderMode: 'blueprint',
       playbackSpeed: 1,
       cameraResetNonce: s.cameraResetNonce + 1,
     })),

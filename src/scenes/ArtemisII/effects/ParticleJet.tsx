@@ -37,12 +37,19 @@ export type ParticleJetProps = {
   count?: number
   /** Render mode — cinematic doubles the pool, brightens the core. */
   cinematic?: boolean
+  /** Blueprint mode — recolour the plume to cyan so no orange bleeds into
+   * the cyanotype palette. Overrides the default amber streak. */
+  blueprint?: boolean
 }
 
 // Amber #e8a23b as normalised RGB.
 const AMBER = new THREE.Color('#e8a23b')
 // White-hot blow-out colour for cinematic mode core.
 const HOT = new THREE.Color('#fff5d6')
+// Blueprint palette — sky cyan matches --color-accent in blueprint theme
+// and the cyan retint applied to wire* materials by applyWirePalette.
+const BP_HEAD = new THREE.Color('#c8e6ff')
+const BP_TAIL = new THREE.Color('#6fb8e8')
 
 export function ParticleJet({
   position,
@@ -55,6 +62,7 @@ export function ParticleJet({
   trailLength = 4.5,
   count = 220,
   cinematic = false,
+  blueprint = false,
 }: ParticleJetProps) {
   const realCount = cinematic ? Math.round(count * 1.7) : count
   const groupRef = useRef<THREE.Group>(null)
@@ -100,14 +108,14 @@ export function ParticleJet({
 
   const trailMat = useMemo(() => {
     return new THREE.MeshBasicMaterial({
-      color: cinematic ? 0xfff5d6 : 0xe8a23b,
+      color: blueprint ? 0x6fb8e8 : cinematic ? 0xfff5d6 : 0xe8a23b,
       transparent: true,
       opacity: 0,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
       side: THREE.DoubleSide,
     })
-  }, [cinematic])
+  }, [cinematic, blueprint])
 
   // Particle state lives outside React. These arrays are mutated in-place
   // by useFrame — no per-frame allocations. The random-age initialisation
@@ -190,10 +198,12 @@ export function ParticleJet({
       const ageRatio = Math.min(1, age[i] / maxAge[i])
       const fade = 1 - ageRatio
       // Cinematic mode: young particles near-white, ageing to amber.
-      // Hybrid mode: straight amber from head to tail.
-      const head = cinematic ? HOT : AMBER
-      const tail = AMBER
-      const mix = cinematic ? 1 - ageRatio * 0.6 : 1
+      // Blueprint: young paper-cyan, ageing to sky cyan — keeps the
+      // "hot→cool" falloff but stays inside the cyanotype palette.
+      // Space (default): straight amber head-to-tail.
+      const head = blueprint ? BP_HEAD : cinematic ? HOT : AMBER
+      const tail = blueprint ? BP_TAIL : AMBER
+      const mix = cinematic || blueprint ? 1 - ageRatio * 0.6 : 1
       const headR = head.r * mix + tail.r * (1 - mix)
       const headG = head.g * mix + tail.g * (1 - mix)
       const headB = head.b * mix + tail.b * (1 - mix)
