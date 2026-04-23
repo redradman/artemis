@@ -12,6 +12,7 @@ import { SolidRocketBooster } from './parts/SolidRocketBooster'
 import { MissionEffects } from './effects/MissionEffects'
 import { CapsulePendulum } from './effects/CapsulePendulum'
 import { CinematicShell } from './effects/CinematicShell'
+import { HybridDetails } from './effects/HybridDetails'
 
 type RocketProps = {
   ref?: Ref<THREE.Group>
@@ -103,6 +104,7 @@ export function Rocket({ ref }: RocketProps) {
           {!cinematic && <LaunchAbortSystem />}
         </ClickableModule>
         {cinematic && <CinematicShell state={state} />}
+        {!cinematic && <HybridDetails state={state} />}
         <MissionEffects state={state} cinematic={cinematic} />
       </group>
     </group>
