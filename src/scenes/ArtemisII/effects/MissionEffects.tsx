@@ -135,10 +135,12 @@ export function MissionEffects({ state, cinematic, blueprint, isPlaying }: Missi
   const rcsActiveOn = stages.sm.visible ? effects.rcsBurst : 0
 
   // RS-25 / SRB particle tuning. Cinematic mode scales up counts + trail
-  // sizes; hybrid stays leaner. Mobile-sized viewports get a ~0.55× budget
-  // so low-end GPUs don't stutter on ignition.
+  // sizes; hybrid stays leaner. Mobile-sized viewports still get a modest
+  // reduction so low-end GPUs don't stutter on ignition, but the previous
+  // 0.55 made the plumes read thin against the now-higher-DPR render;
+  // 0.8 keeps most of the density.
   const small = isSmallViewport()
-  const mobileScale = small ? 0.55 : 1
+  const mobileScale = small ? 0.8 : 1
   const rs25Count = Math.round((cinematic ? 180 : 110) * mobileScale)
   const srbCount = Math.round((cinematic ? 260 : 170) * mobileScale)
   const rl10Count = Math.round((cinematic ? 160 : 100) * mobileScale)
