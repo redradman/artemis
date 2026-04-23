@@ -140,6 +140,11 @@
   position: relative;
   height: 86px;
   margin-top: 4px;
+  cursor: grab;
+}
+
+.track:active {
+  cursor: grabbing;
 }
 
 .baseline {
