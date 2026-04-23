@@ -81,6 +81,19 @@
     radial-gradient(ellipse at 50% 120%, rgba(240, 235, 224, 0.03) 0%, transparent 60%);
 }
 
+/* Cinematic theme chrome tint — keeps the amber accent and starfield
+ * intact but nudges the translucent panels toward a warm charcoal so the
+ * timeline and info surfaces belong to the same sunlit/amber-rim world
+ * as the lit rocket. Distinct from space (pure neutral black) without
+ * being loud. */
+[data-theme='cinematic'] {
+  --panel-bg-heavy: rgba(18, 12, 6, 0.82);
+  --panel-bg-strong: rgba(18, 12, 6, 0.93);
+  --panel-bg-chip: rgba(18, 12, 6, 0.35);
+  --panel-bg-info: rgba(18, 12, 6, 0.88);
+  --panel-border: rgba(232, 162, 59, 0.12);
+}
+
 /* Blueprint theme palette — scoped to [data-theme='blueprint'] on the app
  * root. Swaps the amber accent for a paper-cyan and re-tints the chrome
  * panels to navy so they belong on the cyanotype backdrop instead of
