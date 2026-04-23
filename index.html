@@ -76,7 +76,40 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main>
+        <h1>Artemis II — NASA's return to the Moon</h1>
+        <p>
+          An interactive 3D wireframe of NASA's Artemis II, the first crewed
+          mission to cislunar space since Apollo. Explore every stage of the
+          Space Launch System (SLS) and the Orion spacecraft, from the solid
+          rocket boosters and core stage through the interim cryogenic
+          propulsion stage to the Orion crew and service modules.
+        </p>
+        <p>
+          Built with React, Three.js, and React Three Fiber. Source material is
+          drawn from NASA public-domain documentation.
+        </p>
+        <h2>Features</h2>
+        <ul>
+          <li>Mission timeline stepping through each phase of the Artemis II flight profile.</li>
+          <li>Component explorer with info panels for every major element of the SLS and Orion stack.</li>
+          <li>Toggleable labels identifying each part of the vehicle.</li>
+          <li>Cinematic mode with a guided camera tour.</li>
+          <li>Hybrid view blending the annotated diagram with the cinematic presentation.</li>
+        </ul>
+        <p>
+          Learn more about the mission at
+          <a href="https://www.nasa.gov/mission/artemis-ii/">nasa.gov/mission/artemis-ii</a>.
+        </p>
+        <noscript>
+          <p>
+            This interactive experience requires JavaScript and a WebGL-capable
+            browser. Please enable JavaScript to launch the 3D viewer.
+          </p>
+        </noscript>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
