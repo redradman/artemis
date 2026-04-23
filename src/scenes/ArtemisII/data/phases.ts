@@ -134,7 +134,7 @@ export const phases: Phase[] = [
     tier: 'major',
     tplus: '121:23:20',
     t: 0.78,
-    desc: 'On flight day five Orion reaches lunar close approach, passing the far side at 4,047 miles (6,513 km). Roughly three minutes later the spacecraft records its maximum distance from Earth, having already surpassed the Apollo 13 distance record earlier in the transit. Gravity does the work — no engine burn is required — and the spacecraft is slung onto a return trajectory.',
+    desc: 'On flight day five Orion reaches lunar close approach, passing roughly 4,700 miles (7,600 km) beyond the far side of the Moon. Roughly three minutes later the spacecraft records its maximum distance from Earth, having already surpassed the Apollo 13 distance record earlier in the transit. Gravity does the work — no engine burn is required — and the spacecraft is slung onto a return trajectory.',
     significance: 'First crewed lunar flyby since Apollo 17; peak science observation of the far side.',
     sources: ['artemis-ii-timeline FD06', 'artemis-ii-reference-guide p.4'],
   },
