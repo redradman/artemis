@@ -281,33 +281,40 @@
   opacity: 1;
 }
 
+/* Sans-serif 'i' reads more centred than the monospace glyph, whose
+ * dot-over-stem is slightly off-axis at small sizes and made the icon
+ * look tilted. Padding nudges the glyph down a hair so the stem + dot
+ * sit visually centred in the circle rather than baseline-centred. */
 .infoIcon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   border-radius: 50%;
-  border: 1px solid var(--color-fg-dim);
-  background: transparent;
+  border: 1px solid var(--color-fg);
+  background: rgba(0, 0, 0, 0.25);
   color: var(--color-fg);
-  font-family: var(--font-mono);
-  font-size: 9px;
-  font-weight: var(--weight-medium);
+  font-family: 'Inter', ui-sans-serif, -apple-system, system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: var(--weight-semibold);
+  font-style: italic;
   line-height: 1;
-  padding: 0;
+  padding: 0 0 0 0.5px;
   cursor: pointer;
-  opacity: 0.7;
+  opacity: 0.9;
   transition:
     border-color 0.15s,
     background 0.15s,
-    opacity 0.15s;
+    opacity 0.15s,
+    color 0.15s;
   pointer-events: auto;
   flex: 0 0 auto;
 }
 
 .infoIcon:hover {
-  border-color: var(--color-fg);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
   background: var(--color-accent-wash);
   opacity: 1;
 }
