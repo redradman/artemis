@@ -179,12 +179,12 @@
 }
 
 .tickAbove {
-  height: 6px;
-  top: 36px;
+  height: 4px;
+  top: 38px;
 }
 
 .tickBelow {
-  height: 6px;
+  height: 4px;
   top: 43px;
 }
 
