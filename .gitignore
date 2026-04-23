@@ -32,5 +32,6 @@ dist-ssr
 # Screenshots / image captures
 *.png
 !docs/media/*.png
+!public/*.png
 
 docs/design/*
