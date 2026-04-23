@@ -1,70 +1,196 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { wireActive } from '../materials'
-import { getTorusEdges } from './geometries'
+
+// Three main canopies deployed above the capsule at splashdown.
+// Each canopy is a hemisphere mesh (upper half of a sphere) with a
+// translucent amber fabric material, meridian seam lines, and a fan of
+// risers dropping to the capsule. Fresh deployed state only — the
+// drogues/pilots/forward-bay have already released by this point in
+// the mission, so only the mains are visible.
+//
+// Motion is subtle:
+//  - Per-canopy cloth billow: low-frequency radial vertex wobble via
+//    a scale pulse (cheap approximation, no vertex shader).
+//  - Shared pendulum sway: a small sin-driven rotation on the whole
+//    cluster so the canopies appear to swing as the capsule beneath
+//    them pendulums. The Rocket tree applies the matching sway to the
+//    capsule itself (see PendulumGroup in Rocket.tsx).
 
 export type ParachutesProps = {
   intensity: number
-  /** Position of the capsule top (where risers attach). */
+  /** Position of the capsule top (riser attach point) in rocket-local space. */
   capsuleTop: [number, number, number]
+  /** When true, canopies use a richer, slightly larger style. */
+  cinematic?: boolean
 }
 
-// Eleven schematic canopy hoops arranged above the capsule to represent the
-// Orion parachute sequence: 3 forward-bay, 2 drogues, 3 pilots, 3 mains.
-// Hoops are unfilled torus-edge rings; each one has a single straight riser
-// back to the capsule. No jitter — chutes are structural, not combusting.
-
-type HoopSpec = {
+type CanopySpec = {
+  /** Centre of the canopy above the capsule. */
+  center: [number, number, number]
   radius: number
-  position: [number, number, number]
 }
 
-const HOOPS: HoopSpec[] = [
-  // Forward-bay covers jettison — three tiny parachutes separate the cover.
-  { radius: 0.3, position: [-0.6, 6.5, 0] },
-  { radius: 0.3, position: [0, 7, 0.5] },
-  { radius: 0.3, position: [0.6, 6.5, 0] },
-  // Drogues.
-  { radius: 0.5, position: [-0.4, 8.5, 0.2] },
-  { radius: 0.5, position: [0.4, 8.5, -0.2] },
-  // Pilots.
-  { radius: 0.6, position: [-0.6, 10.5, 0] },
-  { radius: 0.6, position: [0.6, 10.5, 0] },
-  { radius: 0.6, position: [0, 10.8, 0.6] },
-  // Mains — arrange in a triangle above the pack, large canopies.
-  { radius: 2.6, position: [-1.8, 14, 0] },
-  { radius: 2.6, position: [1.8, 14, 0] },
-  { radius: 2.6, position: [0, 14.5, 1.8] },
+const CANOPIES: CanopySpec[] = [
+  { center: [-3.5, 12, 0], radius: 3.0 },
+  { center: [3.5, 12, 0], radius: 3.0 },
+  { center: [0, 13, 3.2], radius: 3.0 },
 ]
 
-export function Parachutes({ intensity, capsuleTop }: ParachutesProps) {
-  const groupRef = useRef<THREE.Group>(null)
-  const material = useMemo(() => wireActive.clone(), [])
+const RISERS_PER_CANOPY = 8
+const BILLOW_FREQ = 1.8
 
-  // One edges geometry per hoop, cached by the radius/tube combo.
-  const hoopEdges = useMemo(
-    () =>
-      HOOPS.map((h) => ({
-        edges: getTorusEdges(h.radius, Math.min(0.05, h.radius * 0.05), 6, 48),
-        position: h.position,
-      })),
-    [],
+// Amber fabric base — cooler in hybrid, warmer + brighter in cinematic.
+const FABRIC_HYBRID = new THREE.Color('#e8a23b')
+const FABRIC_CINEMATIC = new THREE.Color('#f4b95c')
+
+function buildHemisphereGeometry(radius: number): THREE.BufferGeometry {
+  // thetaStart=0, thetaLength=π/2 gives upper hemisphere. Plenty of
+  // meridians/parallels for a smooth silhouette at viewport scale.
+  const g = new THREE.SphereGeometry(radius, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2)
+  return g
+}
+
+function buildSeamLines(radius: number, meridians: number): THREE.BufferGeometry {
+  // Draw meridian arcs from the apex down to the equator on the hemisphere.
+  // Each meridian is a polyline of N points.
+  const points: THREE.Vector3[] = []
+  const pointsPerMeridian = 12
+  for (let m = 0; m < meridians; m++) {
+    const phi = (m / meridians) * Math.PI * 2
+    for (let i = 0; i < pointsPerMeridian - 1; i++) {
+      const t1 = i / (pointsPerMeridian - 1)
+      const t2 = (i + 1) / (pointsPerMeridian - 1)
+      const theta1 = t1 * (Math.PI / 2)
+      const theta2 = t2 * (Math.PI / 2)
+      points.push(
+        new THREE.Vector3(
+          Math.sin(theta1) * Math.cos(phi) * radius,
+          Math.cos(theta1) * radius,
+          Math.sin(theta1) * Math.sin(phi) * radius,
+        ),
+      )
+      points.push(
+        new THREE.Vector3(
+          Math.sin(theta2) * Math.cos(phi) * radius,
+          Math.cos(theta2) * radius,
+          Math.sin(theta2) * Math.sin(phi) * radius,
+        ),
+      )
+    }
+  }
+  return new THREE.BufferGeometry().setFromPoints(points)
+}
+
+function buildRiserGeometry(
+  radius: number,
+  center: [number, number, number],
+  capsuleTop: [number, number, number],
+  count: number,
+): THREE.BufferGeometry {
+  const points: THREE.Vector3[] = []
+  for (let i = 0; i < count; i++) {
+    const phi = (i / count) * Math.PI * 2
+    // Riser starts at the equator of the canopy (y=0 in canopy-local, so
+    // y=center[1] in rocket-local).
+    const startX = center[0] + Math.cos(phi) * radius
+    const startZ = center[2] + Math.sin(phi) * radius
+    points.push(new THREE.Vector3(startX, center[1], startZ))
+    points.push(new THREE.Vector3(capsuleTop[0], capsuleTop[1], capsuleTop[2]))
+  }
+  return new THREE.BufferGeometry().setFromPoints(points)
+}
+
+type CanopyProps = {
+  spec: CanopySpec
+  capsuleTop: [number, number, number]
+  fabricMat: THREE.MeshBasicMaterial
+  seamMat: THREE.LineBasicMaterial
+  riserMat: THREE.LineBasicMaterial
+  billowPhase: number
+}
+
+function Canopy({
+  spec,
+  capsuleTop,
+  fabricMat,
+  seamMat,
+  riserMat,
+  billowPhase,
+}: CanopyProps) {
+  const meshRef = useRef<THREE.Mesh>(null)
+  const seamRef = useRef<THREE.LineSegments>(null)
+
+  const hemisphereGeo = useMemo(
+    () => buildHemisphereGeometry(spec.radius),
+    [spec.radius],
+  )
+  const seamGeo = useMemo(() => buildSeamLines(spec.radius, 12), [spec.radius])
+  const riserGeo = useMemo(
+    () => buildRiserGeometry(spec.radius, spec.center, capsuleTop, RISERS_PER_CANOPY),
+    [spec.radius, spec.center, capsuleTop],
   )
 
-  const risers = useMemo(() => {
-    return HOOPS.map((h) => {
-      return new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(0, 0, 0),
-        new THREE.Vector3(h.position[0], h.position[1], h.position[2]),
-      ])
+  useEffect(() => {
+    return () => {
+      hemisphereGeo.dispose()
+      seamGeo.dispose()
+      riserGeo.dispose()
+    }
+  }, [hemisphereGeo, seamGeo, riserGeo])
+
+  useFrame(({ clock }) => {
+    const t = clock.elapsedTime
+    // Radial billow: scale the mesh's x/z slightly, keeping height steady.
+    const billow = 1 + Math.sin(t * BILLOW_FREQ + billowPhase) * 0.03
+    if (meshRef.current) {
+      meshRef.current.scale.set(billow, 1 + Math.sin(t * BILLOW_FREQ * 0.7 + billowPhase) * 0.015, billow)
+    }
+    if (seamRef.current) {
+      seamRef.current.scale.set(billow, 1 + Math.sin(t * BILLOW_FREQ * 0.7 + billowPhase) * 0.015, billow)
+    }
+  })
+
+  return (
+    <>
+      <mesh ref={meshRef} geometry={hemisphereGeo} material={fabricMat} position={spec.center} />
+      <lineSegments ref={seamRef} geometry={seamGeo} material={seamMat} position={spec.center} />
+      <lineSegments geometry={riserGeo} material={riserMat} />
+    </>
+  )
+}
+
+export function Parachutes({ intensity, capsuleTop, cinematic = false }: ParachutesProps) {
+  const groupRef = useRef<THREE.Group>(null)
+
+  const fabricMat = useMemo(() => {
+    return new THREE.MeshBasicMaterial({
+      color: cinematic ? FABRIC_CINEMATIC : FABRIC_HYBRID,
+      transparent: true,
+      opacity: 0,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    })
+  }, [cinematic])
+
+  const seamMat = useMemo(() => {
+    return new THREE.LineBasicMaterial({
+      color: 0xf0ebe0,
+      transparent: true,
+      opacity: 0,
     })
   }, [])
 
-  /* Per-frame material mutation is the intended R3F pattern; material is
-     a per-instance clone. */
+  const riserMat = useMemo(() => {
+    return new THREE.LineBasicMaterial({
+      color: 0xf0ebe0,
+      transparent: true,
+      opacity: 0,
+    })
+  }, [])
+
   /* eslint-disable react-hooks/immutability */
-  useFrame(() => {
+  useFrame(({ clock }) => {
     const g = groupRef.current
     if (!g) return
     if (intensity <= 0.01) {
@@ -72,20 +198,38 @@ export function Parachutes({ intensity, capsuleTop }: ParachutesProps) {
       return
     }
     g.visible = true
-    g.scale.set(intensity, intensity, intensity)
-    material.opacity = 0.9 * intensity
+
+    // Ease-in opacity driven by the deployment intensity scalar.
+    const fabricTarget = cinematic ? 0.52 : 0.38
+    fabricMat.opacity = fabricTarget * intensity
+    seamMat.opacity = 0.75 * intensity
+    riserMat.opacity = 0.85 * intensity
+
+    // Shared pendulum sway: a small sin-driven yaw + roll oscillation.
+    // The matching Rocket-level PendulumGroup applies the same motion
+    // to the capsule so chutes and capsule swing in sync.
+    const swayAmt = intensity * 0.05
+    g.rotation.z = Math.sin(clock.elapsedTime * 0.8) * swayAmt
+    g.rotation.x = Math.sin(clock.elapsedTime * 0.65 + 1.2) * swayAmt * 0.7
   })
   /* eslint-enable react-hooks/immutability */
 
   return (
     <group ref={groupRef} position={capsuleTop}>
-      {hoopEdges.map((h, idx) => (
-        <group key={`hoop-${idx}`} position={h.position} rotation={[Math.PI / 2, 0, 0]}>
-          <lineSegments geometry={h.edges} material={material} />
-        </group>
-      ))}
-      {risers.map((r, idx) => (
-        <lineSegments key={`riser-${idx}`} geometry={r} material={material} />
+      {CANOPIES.map((spec, i) => (
+        // spec.center is already expressed in canopy-cluster-local space
+        // (relative to capsuleTop), and capsuleTop={[0,0,0]} tells the
+        // Canopy's risers to terminate at the cluster origin — which IS
+        // the capsuleTop in world space after the outer group translation.
+        <Canopy
+          key={i}
+          spec={spec}
+          capsuleTop={[0, 0, 0]}
+          fabricMat={fabricMat}
+          seamMat={seamMat}
+          riserMat={riserMat}
+          billowPhase={i * 1.1}
+        />
       ))}
     </group>
   )

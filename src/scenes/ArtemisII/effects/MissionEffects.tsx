@@ -241,7 +241,11 @@ export function MissionEffects({ state, cinematic }: MissionEffectsProps) {
 
       {/* Entry plasma + parachutes on the crew module. */}
       <EntryPlasma intensity={effects.plasma} shieldPosition={[0, 52, 0]} />
-      <Parachutes intensity={effects.parachutes} capsuleTop={[0, 56.2, 0]} />
+      <Parachutes
+        intensity={effects.parachutes}
+        capsuleTop={[0, 56.2, 0]}
+        cinematic={cinematic}
+      />
 
       <SolarArmAccent deploy={solarDeploy} />
     </>
