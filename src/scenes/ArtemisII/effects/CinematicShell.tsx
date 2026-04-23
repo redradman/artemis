@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 import type { MissionStageState } from '../lib/stateAt'
 
@@ -314,17 +314,39 @@ function SmShell({ active }: { active: number }) {
   )
 }
 
+// Dedicated heat-shield material so we can smoothly lerp its colour
+// between neutral-tan and amber without swapping materials mid-frame.
+const heatShieldCold = new THREE.Color(0xc6bba4)
+const heatShieldHot = new THREE.Color(0xff9432)
+
 function CapsuleShell({ plasma }: { plasma: number }) {
-  // Heat-shield tint lifts toward amber as plasma ramps. Simple material
-  // swap between neutral and active.
-  const hsMat = plasma > 0.2 ? seamActiveMat : hullDarkMat
+  // Per-instance material; colour is interpolated with the plasma
+  // intensity so the heat shield transitions smoothly from charred tan
+  // to glowing amber as the capsule hits the atmosphere.
+  const hsMat = useMemo(
+    () =>
+      new THREE.MeshPhongMaterial({
+        color: heatShieldCold.clone(),
+        emissive: 0x000000,
+        shininess: 12,
+      }),
+    [],
+  )
+  const hsGeo = useMemo(() => new THREE.CircleGeometry(2.31, 28), [])
+
+  useEffect(() => {
+    hsMat.color.lerpColors(heatShieldCold, heatShieldHot, Math.min(1, plasma))
+    // As plasma climbs, emissive amber adds a self-lit quality so the
+    // shield doesn't need directional fill to read hot.
+    const e = Math.min(1, plasma) * 0.6
+    hsMat.emissive.setRGB(e * 1.0, e * 0.58, e * 0.2)
+  }, [plasma, hsMat])
+
   return (
     <group scale={SCALE} position={[0, 52, 0]}>
       <mesh geometry={capsuleGeo} material={hullMat} />
-      {/* Heat-shield disc at the base (y=0..0.55 of the lathe) — we mount
-          an overlay disc coloured by plasma intensity. */}
       <mesh
-        geometry={new THREE.CircleGeometry(2.31, 28)}
+        geometry={hsGeo}
         position={[0, 0.01, 0]}
         rotation={[Math.PI / 2, 0, 0]}
         material={hsMat}
