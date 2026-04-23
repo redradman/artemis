@@ -67,6 +67,9 @@ export const useMissionStore = create<MissionState>((set) => ({
       isPlaying: false,
       activeComponent: null,
       autoRotate: !prefersReducedMotion,
+      showLabels: true,
+      renderMode: 'hybrid',
+      playbackSpeed: 1,
       cameraResetNonce: s.cameraResetNonce + 1,
     })),
 }))
