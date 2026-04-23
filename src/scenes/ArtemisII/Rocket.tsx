@@ -11,6 +11,7 @@ import { ServiceModule } from './parts/ServiceModule'
 import { SolidRocketBooster } from './parts/SolidRocketBooster'
 import { MissionEffects } from './effects/MissionEffects'
 import { CapsulePendulum } from './effects/CapsulePendulum'
+import { CinematicShell } from './effects/CinematicShell'
 
 type RocketProps = {
   ref?: Ref<THREE.Group>
@@ -36,6 +37,7 @@ export function Rocket({ ref }: RocketProps) {
   const { state } = useMissionState()
   const { stages, solarDeploy, orientation } = state
   const renderMode = useMissionStore((s) => s.renderMode)
+  const cinematic = renderMode === 'cinematic'
 
   return (
     <group
@@ -49,7 +51,7 @@ export function Rocket({ ref }: RocketProps) {
           position={[-6 + stages.srbL.offsetX, stages.srbL.offsetY, stages.srbL.offsetZ]}
           visible={stages.srbL.visible}
         >
-          <SolidRocketBooster x={0} />
+          {!cinematic && <SolidRocketBooster x={0} />}
         </ClickableModule>
         <ClickableModule
           id="solid-booster"
@@ -57,7 +59,7 @@ export function Rocket({ ref }: RocketProps) {
           position={[6 + stages.srbR.offsetX, stages.srbR.offsetY, stages.srbR.offsetZ]}
           visible={stages.srbR.visible}
         >
-          <SolidRocketBooster x={0} />
+          {!cinematic && <SolidRocketBooster x={0} />}
         </ClickableModule>
         <ClickableModule
           id="core-stage"
@@ -65,7 +67,7 @@ export function Rocket({ ref }: RocketProps) {
           position={[stages.core.offsetX, stages.core.offsetY, stages.core.offsetZ]}
           visible={stages.core.visible}
         >
-          <CoreStage />
+          {!cinematic && <CoreStage />}
         </ClickableModule>
         <ClickableModule
           id="icps"
@@ -73,7 +75,7 @@ export function Rocket({ ref }: RocketProps) {
           position={[stages.icps.offsetX, stages.icps.offsetY, stages.icps.offsetZ]}
           visible={stages.icps.visible}
         >
-          <ICPS />
+          {!cinematic && <ICPS />}
         </ClickableModule>
         <ClickableModule
           id="service-module"
@@ -81,7 +83,7 @@ export function Rocket({ ref }: RocketProps) {
           position={[stages.sm.offsetX, stages.sm.offsetY, stages.sm.offsetZ]}
           visible={stages.sm.visible}
         >
-          <ServiceModule solarDeploy={solarDeploy} />
+          {!cinematic && <ServiceModule solarDeploy={solarDeploy} />}
         </ClickableModule>
         <CapsulePendulum intensity={state.effects.parachutes} pivotY={56.2}>
           <ClickableModule
@@ -89,7 +91,7 @@ export function Rocket({ ref }: RocketProps) {
             collider={COLLIDERS.crew}
             position={[stages.crew.offsetX, stages.crew.offsetY, stages.crew.offsetZ]}
           >
-            <CrewModule />
+            {!cinematic && <CrewModule />}
           </ClickableModule>
         </CapsulePendulum>
         <ClickableModule
@@ -98,9 +100,10 @@ export function Rocket({ ref }: RocketProps) {
           position={[stages.las.offsetX, stages.las.offsetY, stages.las.offsetZ]}
           visible={stages.las.visible}
         >
-          <LaunchAbortSystem />
+          {!cinematic && <LaunchAbortSystem />}
         </ClickableModule>
-        <MissionEffects state={state} cinematic={renderMode === 'cinematic'} />
+        {cinematic && <CinematicShell state={state} />}
+        <MissionEffects state={state} cinematic={cinematic} />
       </group>
     </group>
   )
