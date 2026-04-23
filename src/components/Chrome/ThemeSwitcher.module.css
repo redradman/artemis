@@ -101,6 +101,18 @@
   z-index: 1;
 }
 
+/* Press feedback — tiny translate for tactility plus a wash on inactive
+ * pills so the tap reads even though the option isn't selected yet. The
+ * active pill stays visually anchored since it already carries the fill. */
+.pill:active {
+  transform: translateY(0.5px);
+  transition: transform 0.05s;
+}
+
+.pill:not(.pillActive):active {
+  background: var(--color-accent-wash);
+}
+
 @media (max-width: 640px) {
   .wrap {
     gap: 6px;

@@ -53,6 +53,7 @@
 }
 
 .btn:active {
-  transform: translateY(1px);
+  transform: translateY(0.5px);
+  transition: transform 0.05s;
 }
 

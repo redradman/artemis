@@ -79,12 +79,18 @@
   transition:
     background 0.15s,
     color 0.15s,
-    border-color 0.15s;
+    border-color 0.15s,
+    transform 0.06s;
 }
 
 .playBtn:hover,
 .speedBtn:hover {
   border-color: var(--color-fg);
+}
+
+.playBtn:active,
+.speedBtn:active {
+  transform: translateY(0.5px);
 }
 
 .speedBtnActive {

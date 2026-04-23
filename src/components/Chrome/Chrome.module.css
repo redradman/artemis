@@ -197,6 +197,13 @@
   outline-offset: 2px;
 }
 
+/* Subtle 0.5px nudge on press — reads as tactile without visually
+ * shifting neighbouring controls enough to disturb the line. */
+.hudBtn:active {
+  transform: translateY(0.5px);
+  transition: transform 0.05s;
+}
+
 @media (max-width: 1024px) {
   .nameRule {
     display: none;
