@@ -13,6 +13,7 @@ import { MissionEffects } from './effects/MissionEffects'
 import { CapsulePendulum } from './effects/CapsulePendulum'
 import { CinematicShell } from './effects/CinematicShell'
 import { HybridDetails } from './effects/HybridDetails'
+import { SelectionHighlight } from './effects/SelectionHighlight'
 
 type RocketProps = {
   ref?: Ref<THREE.Group>
@@ -38,6 +39,7 @@ export function Rocket({ ref }: RocketProps) {
   const { state } = useMissionState()
   const { stages, solarDeploy, orientation } = state
   const renderMode = useMissionStore((s) => s.renderMode)
+  const activeComponent = useMissionStore((s) => s.activeComponent)
   const cinematic = renderMode === 'cinematic'
 
   return (
@@ -106,6 +108,11 @@ export function Rocket({ ref }: RocketProps) {
         {cinematic && <CinematicShell state={state} />}
         {!cinematic && <HybridDetails state={state} />}
         <MissionEffects state={state} cinematic={cinematic} />
+        <SelectionHighlight
+          state={state}
+          activeId={activeComponent}
+          cinematic={cinematic}
+        />
       </group>
     </group>
   )
