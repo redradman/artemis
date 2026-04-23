@@ -19,6 +19,41 @@ type CinematicShellProps = {
   state: MissionStageState
 }
 
+const SOLAR_WING_ANGLES = [
+  Math.PI * 0.25,
+  Math.PI * 0.75,
+  Math.PI * 1.25,
+  Math.PI * 1.75,
+]
+
+function SolarArrays({ deploy }: { deploy: number }) {
+  // Matches ServiceModule's scaleZ ramp so the wings unfold from packed
+  // (0.2 scale) to fully extended (1.0 scale). Per-panel thin edge strip
+  // gives a visible seam on the arm side.
+  const scaleZ = 0.2 + deploy * 0.8
+  return (
+    <group>
+      {SOLAR_WING_ANGLES.map((angle, i) => (
+        <group key={i} position={[0, 50.3, 0]} rotation={[0, angle, 0]}>
+          <group scale={[1, 1, scaleZ]}>
+            <mesh geometry={solarArm} position={[0, 0, 1.5]} material={hullDarkMat} />
+            {[0, 1, 2].map((j) => (
+              <group key={j} position={[0, 0, 0.9 + j * 2]}>
+                <mesh geometry={solarPanel} material={solarPanelMat} />
+                <mesh
+                  geometry={new THREE.BoxGeometry(3.82, 0.04, 0.1)}
+                  position={[0, 0.07, 0]}
+                  material={solarPanelEdgeMat}
+                />
+              </group>
+            ))}
+          </group>
+        </group>
+      ))}
+    </group>
+  )
+}
+
 const SCALE = 1.005
 
 // Shared materials — cloned where a per-instance opacity mutation is
@@ -65,6 +100,21 @@ const icpsOsa = new THREE.CylinderGeometry(2.31, 2.56, 1.8, 24, 1, false)
 const smBody = new THREE.CylinderGeometry(2.31, 2.31, 4, 24, 1, false)
 const smEngine = new THREE.CylinderGeometry(0.26, 0.61, 1, 14, 2, false)
 const rcsQuad = new THREE.BoxGeometry(0.35, 0.45, 0.35)
+
+// Solar wing geometry — arm beam + three rectangular panels. Dimensions
+// mirror ServiceModule.tsx so the two modes read as the same vehicle.
+const solarArm = new THREE.BoxGeometry(0.2, 0.2, 3)
+const solarPanel = new THREE.BoxGeometry(3.8, 0.09, 1.9)
+const solarPanelMat = new THREE.MeshPhongMaterial({
+  color: 0x1d3b6b,
+  shininess: 45,
+  specular: 0x3a5a90,
+  side: THREE.DoubleSide,
+})
+const solarPanelEdgeMat = new THREE.MeshPhongMaterial({
+  color: 0xb0a58c,
+  shininess: 8,
+})
 
 const lasBpc = new THREE.CylinderGeometry(0.91, 0.91, 1.3, 18, 1, false)
 const lasAbortMotor = new THREE.CylinderGeometry(0.56, 0.56, 3.8, 18, 1, false)
@@ -295,7 +345,7 @@ function LasShell() {
 }
 
 export function CinematicShell({ state }: CinematicShellProps) {
-  const { stages, effects } = state
+  const { stages, effects, solarDeploy } = state
   return (
     <>
       {/* Left SRB */}
@@ -330,12 +380,14 @@ export function CinematicShell({ state }: CinematicShellProps) {
         <IcpsShell active={Math.max(effects.rl10Prm, effects.rl10Arb)} />
       </group>
 
-      {/* SM */}
+      {/* SM + solar arrays. Wings deploy via the existing solarDeploy
+          scalar so they unfold after Orion separates from the ICPS. */}
       <group
         position={[stages.sm.offsetX, stages.sm.offsetY, stages.sm.offsetZ]}
         visible={stages.sm.visible}
       >
         <SmShell active={effects.esmMain} />
+        <SolarArrays deploy={solarDeploy} />
       </group>
 
       {/* Capsule — always visible */}
