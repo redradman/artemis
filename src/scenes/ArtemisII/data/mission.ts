@@ -11,7 +11,7 @@ export const mission: MissionMeta = {
   name: 'ARTEMIS II',
   subtitle: 'SPACE LAUNCH SYSTEM · BLOCK 1 CREW',
   subtitle2: 'ORION · INTEGRITY · APR 2026',
-  height: '98.1 m',
+  height: '98.3 m',
   mass: '2,600 t',
   thrust: '39.1 MN',
 }
