@@ -269,15 +269,6 @@ function App() {
       <Chrome />
 
       <Timeline />
-
-      <a
-        className={styles.credit}
-        href="https://radman.dev"
-        target="_blank"
-        rel="noreferrer noopener"
-      >
-        MADE BY <span className={styles.creditName}>RADMAN</span>
-      </a>
     </main>
   )
 }

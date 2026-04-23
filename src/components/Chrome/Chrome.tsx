@@ -52,6 +52,20 @@ export function Chrome() {
           {mission.name}
           <span className={styles.nameRule} aria-hidden="true" />
         </div>
+        <div className={styles.credit}>
+          <span className={styles.creditSource}>
+            SOURCE MATERIAL <span className={styles.creditNasa}>NASA</span>
+          </span>
+          <span className={styles.creditDot} aria-hidden="true">·</span>
+          <a
+            className={styles.creditLink}
+            href="https://radman.dev"
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            DESIGNED BY <span className={styles.creditName}>RADMAN</span>
+          </a>
+        </div>
       </div>
 
       <div className={styles.right}>
