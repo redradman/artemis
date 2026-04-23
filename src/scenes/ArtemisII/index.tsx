@@ -8,6 +8,7 @@ import { useCameraFlyTo } from '../../hooks/useCameraFlyTo'
 import { components } from './data/components'
 import { useMissionState } from '../../hooks/useMissionState'
 import { useMissionStore } from '../../store/missionStore'
+import { CelestialBodies } from './effects/CelestialBodies'
 
 // Cinematic mode swaps the flat ambient fill for a low-ambient + key +
 // warm rim rig so the solid MeshPhong panels read three-dimensional. The
@@ -163,6 +164,7 @@ export function ArtemisIIScene() {
           a very distant backstop rather than removed outright. */}
       <fog attach="fog" args={[0x000000, 500, 900]} />
       {cinematic ? <CinematicLights /> : <ambientLight intensity={1} />}
+      <CelestialBodies cinematic={cinematic} />
       <Rocket ref={rocketRef} />
       <Projector
         targets={targets}
