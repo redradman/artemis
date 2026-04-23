@@ -77,6 +77,19 @@
   background: var(--color-bg);
 }
 
+/* Blueprint-style backdrop applied only in blueprint mode. Deep cyanotype
+ * navy with a faint two-level grid: major 80px, minor 20px. White wires
+ * read as paper-on-blue like a classic technical drawing. */
+.sceneBlueprint {
+  background-color: #0b2e55;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.09) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 80px 80px, 80px 80px, 20px 20px, 20px 20px;
+}
+
 .horizon {
   position: absolute;
   left: 0;

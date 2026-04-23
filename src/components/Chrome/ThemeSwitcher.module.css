@@ -1,0 +1,57 @@
+/* Three-pill segmented control sitting directly under the credit line.
+ * Shares the mono-hairline language of the rest of the HUD buttons but
+ * renders as a contiguous group so the "pick one of three" affordance
+ * reads at a glance. */
+.group {
+  display: inline-flex;
+  gap: 0;
+  margin-top: 8px;
+  pointer-events: auto;
+}
+
+.pill {
+  background: transparent;
+  color: var(--color-fg);
+  border: var(--hairline);
+  font-family: var(--font-mono);
+  font-size: var(--text-9);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-04);
+  padding: 5px 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  opacity: 0.75;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s,
+    opacity 0.15s;
+}
+
+/* Collapse adjacent borders so the group reads as one pill-strip. */
+.pill + .pill {
+  border-left-width: 0;
+}
+
+.pill:hover {
+  border-color: var(--color-fg);
+  opacity: 1;
+}
+
+.pillActive {
+  background: var(--color-fg);
+  color: var(--color-bg);
+  border-color: var(--color-fg);
+  opacity: 1;
+}
+
+.pill:focus {
+  outline: none;
+}
+
+.pill:focus-visible {
+  outline: 1px solid var(--color-accent);
+  outline-offset: 2px;
+  position: relative;
+  z-index: 1;
+}

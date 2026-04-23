@@ -80,3 +80,20 @@
     radial-gradient(ellipse at 50% 55%, rgba(240, 235, 224, 0.015) 0%, transparent 55%),
     radial-gradient(ellipse at 50% 120%, rgba(240, 235, 224, 0.03) 0%, transparent 60%);
 }
+
+/* Blueprint theme palette — scoped to [data-theme='blueprint'] on the app
+ * root. Swaps the amber accent for a paper-cyan and re-tints the chrome
+ * panels to navy so they belong on the cyanotype backdrop instead of
+ * reading as dark holes. Space and cinematic themes are untouched. */
+[data-theme='blueprint'] {
+  --color-accent: #8fd2ff;
+  --color-accent-dim: rgba(143, 210, 255, 0.55);
+  --color-accent-wash: rgba(143, 210, 255, 0.10);
+  --color-accent-glow: rgba(143, 210, 255, 0.5);
+
+  --panel-bg: rgba(10, 38, 72, 0.65);
+  --panel-bg-heavy: rgba(10, 38, 72, 0.85);
+  --panel-bg-strong: rgba(10, 38, 72, 0.93);
+  --panel-bg-chip: rgba(10, 38, 72, 0.4);
+  --panel-bg-info: rgba(10, 38, 72, 0.88);
+}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useLayoutEffect, useMemo } from 'react'
 import styles from './App.module.css'
 import { Chrome } from './components/Chrome/Chrome'
 import { Timeline } from './components/Timeline/Timeline'
@@ -12,6 +12,7 @@ import { useProjectionStore } from './hooks/useProjectedPoints'
 import { components } from './scenes/ArtemisII/data/components'
 import { phases } from './scenes/ArtemisII/data/phases'
 import { findActivePhaseIndex } from './hooks/useMissionState'
+import { applyWirePalette } from './scenes/ArtemisII/materials'
 
 const SCALE_METERS = [0, 25, 50, 75, 100]
 
@@ -173,6 +174,7 @@ function App() {
   const setAutoRotate = useMissionStore((s) => s.setAutoRotate)
   const renderMode = useMissionStore((s) => s.renderMode)
   const cinematic = renderMode === 'cinematic'
+  const blueprint = renderMode === 'blueprint'
   const stars = cinematic ? CINEMATIC_STARS : HYBRID_STARS
 
   const visibility = useMemo(() => {
@@ -186,6 +188,12 @@ function App() {
   useEffect(() => {
     if (activeComponent) setAutoRotate(false)
   }, [activeComponent, setAutoRotate])
+
+  // Retune shared wire materials when the theme changes. useLayoutEffect
+  // so the colour mutation lands before the browser paints the frame.
+  useLayoutEffect(() => {
+    applyWirePalette(renderMode)
+  }, [renderMode])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -220,9 +228,9 @@ function App() {
   }, [setActiveComponent])
 
   return (
-    <main className={styles.root}>
+    <main className={styles.root} data-theme={renderMode}>
       <div
-        className={styles.scene}
+        className={`${styles.scene}${blueprint ? ` ${styles.sceneBlueprint}` : ''}`}
         role="img"
         aria-label="Interactive 3D wireframe of the Artemis II launch vehicle: a Space Launch System core stage flanked by twin solid rocket boosters, topped by the Interim Cryogenic Propulsion Stage, the Orion service module with solar arrays, the crew module, and the launch abort system."
       >
@@ -231,6 +239,7 @@ function App() {
 
       <div className={styles.vignette} />
       {cinematic && <div className={styles.nebula} aria-hidden="true" />}
+      {!blueprint && (
       <svg
         className={`${styles.starfield}${cinematic ? ` ${styles.starfieldCinematic}` : ''}`}
         aria-hidden="true"
@@ -252,6 +261,7 @@ function App() {
           />
         ))}
       </svg>
+      )}
 
       <div className={styles.horizon} aria-hidden="true" />
 

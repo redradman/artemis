@@ -2,6 +2,7 @@ import styles from './Chrome.module.css'
 import { mission } from '../../scenes/ArtemisII/data/mission'
 import { useMissionState } from '../../hooks/useMissionState'
 import { useMissionStore } from '../../store/missionStore'
+import { ThemeSwitcher } from './ThemeSwitcher'
 
 type SpecProps = {
   label: string
@@ -38,12 +39,9 @@ export function Chrome() {
   const { stats } = useMissionState()
   const autoRotate = useMissionStore((s) => s.autoRotate)
   const showLabels = useMissionStore((s) => s.showLabels)
-  const renderMode = useMissionStore((s) => s.renderMode)
   const toggleAutoRotate = useMissionStore((s) => s.toggleAutoRotate)
   const toggleLabels = useMissionStore((s) => s.toggleLabels)
-  const toggleRenderMode = useMissionStore((s) => s.toggleRenderMode)
   const reset = useMissionStore((s) => s.reset)
-  const cinematic = renderMode === 'cinematic'
 
   return (
     <div className={styles.top}>
@@ -66,6 +64,7 @@ export function Chrome() {
             DESIGNED BY <span className={styles.creditName}>RADMAN</span>
           </a>
         </div>
+        <ThemeSwitcher />
       </div>
 
       <div className={styles.right}>
@@ -96,17 +95,6 @@ export function Chrome() {
             aria-pressed={showLabels}
           >
             LABELS
-          </button>
-          <button
-            type="button"
-            onClick={toggleRenderMode}
-            className={
-              cinematic ? `${styles.hudBtn} ${styles.hudBtnActive}` : styles.hudBtn
-            }
-            aria-pressed={cinematic}
-            title="Toggle between schematic-hybrid and cinematic VFX modes"
-          >
-            {cinematic ? 'CINEMATIC' : 'HYBRID'}
           </button>
           <button type="button" onClick={reset} className={styles.hudBtn}>
             RESET

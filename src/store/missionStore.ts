@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 
 export type PlaybackSpeed = 1 | 2 | 3 | 5
-export type RenderMode = 'hybrid' | 'cinematic'
+export type RenderMode = 'space' | 'cinematic' | 'blueprint'
 
 const prefersReducedMotion =
   typeof window !== 'undefined' &&
@@ -34,7 +34,7 @@ type MissionState = {
   toggleAutoRotate: () => void
   setAutoRotate: (v: boolean) => void
   toggleLabels: () => void
-  toggleRenderMode: () => void
+  setRenderMode: (mode: RenderMode) => void
   reset: () => void
 }
 
@@ -46,7 +46,7 @@ export const useMissionStore = create<MissionState>((set) => ({
   resumeOnPanelClose: false,
   autoRotate: !prefersReducedMotion,
   showLabels: true,
-  renderMode: 'hybrid',
+  renderMode: 'space',
   cameraResetNonce: 0,
   setTime: (t) =>
     set(() => {
@@ -92,8 +92,7 @@ export const useMissionStore = create<MissionState>((set) => ({
   toggleAutoRotate: () => set((s) => ({ autoRotate: !s.autoRotate })),
   setAutoRotate: (autoRotate) => set({ autoRotate }),
   toggleLabels: () => set((s) => ({ showLabels: !s.showLabels })),
-  toggleRenderMode: () =>
-    set((s) => ({ renderMode: s.renderMode === 'hybrid' ? 'cinematic' : 'hybrid' })),
+  setRenderMode: (renderMode) => set({ renderMode }),
   reset: () =>
     set((s) => ({
       currentT: 0,
@@ -102,7 +101,7 @@ export const useMissionStore = create<MissionState>((set) => ({
       resumeOnPanelClose: false,
       autoRotate: !prefersReducedMotion,
       showLabels: true,
-      renderMode: 'hybrid',
+      renderMode: 'space',
       playbackSpeed: 1,
       cameraResetNonce: s.cameraResetNonce + 1,
     })),
