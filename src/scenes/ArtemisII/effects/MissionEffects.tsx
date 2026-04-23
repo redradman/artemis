@@ -15,11 +15,14 @@ type MissionEffectsProps = {
   cinematic: boolean
 }
 
+// Emitter sits just below the cinematic engine-bell bottom (bell bottom
+// ≈ y=-6.4 at shell scale 1.005) so particles emerge cleanly below the
+// nozzle exit rather than clipping inside the bell.
 const RS25_POSITIONS: Array<[number, number, number]> = [
-  [1.15, -6.2, 1.15],
-  [-1.15, -6.2, 1.15],
-  [1.15, -6.2, -1.15],
-  [-1.15, -6.2, -1.15],
+  [1.15, -7.1, 1.15],
+  [-1.15, -7.1, 1.15],
+  [1.15, -7.1, -1.15],
+  [-1.15, -7.1, -1.15],
 ]
 
 // 8 BSMs per booster: 4 forward at skirt y=+42, 4 aft at skirt y=+1.
