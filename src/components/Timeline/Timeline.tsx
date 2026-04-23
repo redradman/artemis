@@ -328,7 +328,12 @@ export function Timeline() {
           )
         })}
 
-        <div className={styles.playhead} style={{ left: `${currentT * 100}%` }} />
+        <div
+          className={
+            isPlaying ? `${styles.playhead} ${styles.playheadPlaying}` : styles.playhead
+          }
+          style={{ left: `${currentT * 100}%` }}
+        />
       </div>
     </div>
   )

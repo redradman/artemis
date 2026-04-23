@@ -529,6 +529,34 @@
   z-index: 2;
 }
 
+/* Breathing halo during playback — signals "mission clock is running" and
+ * pairs with the progress-bar fill to make motion feel active. Paused
+ * state (no class) keeps the static shadow so the diamond doesn't pulse
+ * when nothing's happening. */
+.playheadPlaying {
+  animation: playheadPulse 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes playheadPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 2px var(--color-bg),
+      0 0 10px var(--color-accent-glow);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px var(--color-bg),
+      0 0 22px var(--color-accent-glow),
+      0 0 36px var(--color-accent-dim);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .playheadPlaying {
+    animation: none;
+  }
+}
+
 @media (max-width: 900px) {
   .wrap {
     padding: 12px 14px 16px;
