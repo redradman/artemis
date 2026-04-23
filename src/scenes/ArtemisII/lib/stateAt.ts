@@ -20,10 +20,73 @@ export type MissionEffects = {
   parachutes: number
 }
 
+export type Orientation = {
+  pitch: number
+  yaw: number
+  roll: number
+}
+
 export type MissionStageState = {
   stages: Record<StageId, StageState>
   solarDeploy: number
   effects: MissionEffects
+  orientation: Orientation
+}
+
+// Keyed banking poses. Each entry is the ship's attitude at that phase,
+// expressed as Euler angles in radians. Interpolation between entries
+// drives the "on a trajectory" illusion: the rocket rotates in place
+// while staying centred in the viewport, and the plumes swing with it.
+const ORIENTATION_KEYS: Array<{ t: number } & Orientation> = [
+  { t: 0.0, pitch: 0, yaw: 0, roll: 0 }, // LIFTOFF — vertical
+  { t: 0.03, pitch: -0.08, yaw: 0.05, roll: 0 }, // MAX-Q — pitchover begins
+  { t: 0.075, pitch: -0.18, yaw: 0.12, roll: 0 }, // pre-SRB SEP
+  { t: 0.08, pitch: -0.22, yaw: 0.15, roll: 0.28 }, // SRB SEP — roll kick
+  { t: 0.1, pitch: -0.28, yaw: 0.18, roll: 0.08 }, // post-SRB SEP settle
+  { t: 0.14, pitch: -0.4, yaw: 0.25, roll: -0.15 }, // LAS JETT
+  { t: 0.18, pitch: -0.55, yaw: 0.3, roll: 0 },
+  { t: 0.22, pitch: -0.75, yaw: 0.38, roll: 0 }, // MECO — near horizontal
+  { t: 0.24, pitch: -0.88, yaw: 0.45, roll: 0.05 }, // ICPS SEP
+  { t: 0.3, pitch: -0.95, yaw: 0.7, roll: -0.1 }, // ICPS PRM
+  { t: 0.36, pitch: -0.95, yaw: 0.95, roll: -0.2 }, // ICPS ARB
+  { t: 0.42, pitch: -0.7, yaw: 1.35, roll: 0.4 }, // PROX OPS — maneuver
+  { t: 0.52, pitch: -0.3, yaw: 1.8, roll: -0.2 }, // TLI — new heading
+  { t: 0.65, pitch: -0.05, yaw: 2.3, roll: 0.15 }, // trans-lunar coast
+  { t: 0.78, pitch: 0.1, yaw: 2.9, roll: 0.3 }, // LUNAR FLYBY
+  { t: 0.88, pitch: 0.25, yaw: 3.3, roll: 0 }, // return coast
+  { t: 0.92, pitch: 0.35, yaw: 3.5, roll: 0.15 }, // CM/SM SEP — small kick
+  { t: 0.94, pitch: 0.45, yaw: 3.55, roll: 0 },
+  { t: 0.96, pitch: 0.7, yaw: 3.6, roll: 0 }, // ENTRY — heat shield into flow
+  { t: 0.99, pitch: 0.35, yaw: 3.6, roll: 0 }, // deceleration
+  { t: 1.0, pitch: 0, yaw: 3.6, roll: 0 }, // SPLASHDOWN — vertical under chutes
+]
+
+function easeInOutCubic(x: number): number {
+  return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2
+}
+
+function orientationAt(t: number): Orientation {
+  if (t <= ORIENTATION_KEYS[0].t) return ORIENTATION_KEYS[0]
+  if (t >= ORIENTATION_KEYS[ORIENTATION_KEYS.length - 1].t) {
+    const last = ORIENTATION_KEYS[ORIENTATION_KEYS.length - 1]
+    return { pitch: last.pitch, yaw: last.yaw, roll: last.roll }
+  }
+  let nextIdx = 1
+  for (let i = 1; i < ORIENTATION_KEYS.length; i++) {
+    if (ORIENTATION_KEYS[i].t >= t) {
+      nextIdx = i
+      break
+    }
+  }
+  const prev = ORIENTATION_KEYS[nextIdx - 1]
+  const next = ORIENTATION_KEYS[nextIdx]
+  const span = next.t - prev.t || 1
+  const k = easeInOutCubic((t - prev.t) / span)
+  return {
+    pitch: prev.pitch + (next.pitch - prev.pitch) * k,
+    yaw: prev.yaw + (next.yaw - prev.yaw) * k,
+    roll: prev.roll + (next.roll - prev.roll) * k,
+  }
 }
 
 function easeOutCubic(x: number): number {
@@ -154,5 +217,7 @@ export function stateAt(t: number): MissionStageState {
     parachutes,
   }
 
-  return { stages, solarDeploy, effects }
+  const orientation = orientationAt(t)
+
+  return { stages, solarDeploy, effects, orientation }
 }

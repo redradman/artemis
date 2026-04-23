@@ -23,68 +23,80 @@ const COLLIDERS = {
   las: { radius: 1.0, height: 11, y: 61 },
 } as const
 
+// Outer pivot sits at the camera target (0, 1.5, 0) so banking rotates
+// the rocket around its own geometric midpoint — "rotate in place" — and
+// the inner group carries the historical -28y translation that lifts the
+// aft skirt to world y=0.
+const PIVOT_Y = 1.5
+const INNER_Y = -28 - PIVOT_Y
+
 export function Rocket({ ref }: RocketProps) {
   const { state } = useMissionState()
-  const { stages, solarDeploy } = state
+  const { stages, solarDeploy, orientation } = state
 
   return (
-    <group ref={ref} position={[0, -28, 0]}>
-      <ClickableModule
-        id="solid-booster"
-        collider={COLLIDERS.srb}
-        position={[-6 + stages.srbL.offsetX, stages.srbL.offsetY, stages.srbL.offsetZ]}
-        visible={stages.srbL.visible}
-      >
-        <SolidRocketBooster x={0} />
-      </ClickableModule>
-      <ClickableModule
-        id="solid-booster"
-        collider={COLLIDERS.srb}
-        position={[6 + stages.srbR.offsetX, stages.srbR.offsetY, stages.srbR.offsetZ]}
-        visible={stages.srbR.visible}
-      >
-        <SolidRocketBooster x={0} />
-      </ClickableModule>
-      <ClickableModule
-        id="core-stage"
-        collider={COLLIDERS.core}
-        position={[stages.core.offsetX, stages.core.offsetY, stages.core.offsetZ]}
-        visible={stages.core.visible}
-      >
-        <CoreStage />
-      </ClickableModule>
-      <ClickableModule
-        id="icps"
-        collider={COLLIDERS.icps}
-        position={[stages.icps.offsetX, stages.icps.offsetY, stages.icps.offsetZ]}
-        visible={stages.icps.visible}
-      >
-        <ICPS />
-      </ClickableModule>
-      <ClickableModule
-        id="service-module"
-        collider={COLLIDERS.sm}
-        position={[stages.sm.offsetX, stages.sm.offsetY, stages.sm.offsetZ]}
-        visible={stages.sm.visible}
-      >
-        <ServiceModule solarDeploy={solarDeploy} />
-      </ClickableModule>
-      <ClickableModule
-        id="crew-module"
-        collider={COLLIDERS.crew}
-        position={[stages.crew.offsetX, stages.crew.offsetY, stages.crew.offsetZ]}
-      >
-        <CrewModule />
-      </ClickableModule>
-      <ClickableModule
-        id="launch-abort"
-        collider={COLLIDERS.las}
-        position={[stages.las.offsetX, stages.las.offsetY, stages.las.offsetZ]}
-        visible={stages.las.visible}
-      >
-        <LaunchAbortSystem />
-      </ClickableModule>
-      <MissionEffects state={state} />
+    <group
+      position={[0, PIVOT_Y, 0]}
+      rotation={[orientation.pitch, orientation.yaw, orientation.roll]}
+    >
+      <group ref={ref} position={[0, INNER_Y, 0]}>
+        <ClickableModule
+          id="solid-booster"
+          collider={COLLIDERS.srb}
+          position={[-6 + stages.srbL.offsetX, stages.srbL.offsetY, stages.srbL.offsetZ]}
+          visible={stages.srbL.visible}
+        >
+          <SolidRocketBooster x={0} />
+        </ClickableModule>
+        <ClickableModule
+          id="solid-booster"
+          collider={COLLIDERS.srb}
+          position={[6 + stages.srbR.offsetX, stages.srbR.offsetY, stages.srbR.offsetZ]}
+          visible={stages.srbR.visible}
+        >
+          <SolidRocketBooster x={0} />
+        </ClickableModule>
+        <ClickableModule
+          id="core-stage"
+          collider={COLLIDERS.core}
+          position={[stages.core.offsetX, stages.core.offsetY, stages.core.offsetZ]}
+          visible={stages.core.visible}
+        >
+          <CoreStage />
+        </ClickableModule>
+        <ClickableModule
+          id="icps"
+          collider={COLLIDERS.icps}
+          position={[stages.icps.offsetX, stages.icps.offsetY, stages.icps.offsetZ]}
+          visible={stages.icps.visible}
+        >
+          <ICPS />
+        </ClickableModule>
+        <ClickableModule
+          id="service-module"
+          collider={COLLIDERS.sm}
+          position={[stages.sm.offsetX, stages.sm.offsetY, stages.sm.offsetZ]}
+          visible={stages.sm.visible}
+        >
+          <ServiceModule solarDeploy={solarDeploy} />
+        </ClickableModule>
+        <ClickableModule
+          id="crew-module"
+          collider={COLLIDERS.crew}
+          position={[stages.crew.offsetX, stages.crew.offsetY, stages.crew.offsetZ]}
+        >
+          <CrewModule />
+        </ClickableModule>
+        <ClickableModule
+          id="launch-abort"
+          collider={COLLIDERS.las}
+          position={[stages.las.offsetX, stages.las.offsetY, stages.las.offsetZ]}
+          visible={stages.las.visible}
+        >
+          <LaunchAbortSystem />
+        </ClickableModule>
+        <MissionEffects state={state} />
+      </group>
     </group>
   )
 }
