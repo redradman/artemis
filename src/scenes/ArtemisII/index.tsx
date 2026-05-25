@@ -6,7 +6,7 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import { Rocket } from './Rocket'
 import { Projector } from '../../hooks/useProjectedPoints'
 import { useCameraFlyTo } from '../../hooks/useCameraFlyTo'
-import { components } from './data/components'
+import { components, type RocketComponent } from './data/components'
 import { useMissionState } from '../../hooks/useMissionState'
 import { useMissionStore } from '../../store/missionStore'
 import { CelestialBodies } from './effects/CelestialBodies'
@@ -79,6 +79,39 @@ function defaultFraming(compact: boolean): {
   return { radius, target, fixedPos }
 }
 
+// Per-component focus framing. Desktop frames the part with surrounding
+// context at ~1.8× its focusRadius, centred. On compact viewports the info
+// panel is a bottom sheet covering the lower ~half of the screen, so a
+// centred part lands right behind it — invisible. There we pull back further
+// (smaller part) and drop the orbit target so the part renders in the clear
+// band above the sheet instead of dead-centre.
+const FOCUS_RADIUS_MULT = 1.8
+const FOCUS_RADIUS_MULT_COMPACT = 2.5
+const HALF_FOV_TAN = Math.tan((28 / 2) * (Math.PI / 180))
+// Fractions of viewport height taken by the mobile info sheet (matches the
+// InfoPanel max-height) and reserved at the top for the chrome.
+const MOBILE_SHEET_FRAC = 0.5
+const MOBILE_CHROME_FRAC = 0.18
+
+function focusFraming(
+  c: RocketComponent,
+  compact: boolean,
+): { target: THREE.Vector3; radius: number } {
+  if (!compact) {
+    return { target: c.focus.clone(), radius: c.focusRadius * FOCUS_RADIUS_MULT }
+  }
+  const radius = c.focusRadius * FOCUS_RADIUS_MULT_COMPACT
+  // Target screen position for the part: the centre of the band between the
+  // top chrome and the sheet. A point Δ world-units above the orbit target
+  // projects to fraction 0.5·(1 − Δ/halfHeight) from the top, so solving for
+  // the band centre gives the downward target shift that lifts the part there.
+  const bandCenter = (MOBILE_CHROME_FRAC + (1 - MOBILE_SHEET_FRAC)) / 2
+  const drop = radius * HALF_FOV_TAN * (1 - 2 * bandCenter)
+  const target = c.focus.clone()
+  target.y -= drop
+  return { target, radius }
+}
+
 // Scale-reference targets. The rocket geometry spans world y -7 → 66 (73 units)
 // representing 0 → 98.1 m. Scale = 73/98.1 = 0.744 units per metre. These
 // are anchored in WORLD space (skipParent) so that keyed banking, which
@@ -111,17 +144,18 @@ function CameraRig({
   const goal = useMemo(() => {
     if (activeComponent) {
       const c = components.find((x) => x.id === activeComponent)
-      // Pull the camera back by ~1.8× the per-component focusRadius so
-      // the selected part is framed with surrounding context instead
-      // of filling the viewport edge-to-edge. With the new silhouette
-      // highlight the whole outlined stage needs to be visible.
-      if (c)
+      // Frame the part with surrounding context (desktop) or lifted into the
+      // band above the mobile info sheet (compact) so the highlight stays
+      // visible rather than hiding behind the description.
+      if (c) {
+        const f = focusFraming(c, compact)
         return {
-          target: c.focus.clone(),
-          radius: c.focusRadius * 1.8,
+          target: f.target,
+          radius: f.radius,
           local: true,
           fixedPos: undefined as THREE.Vector3 | undefined,
         }
+      }
     }
     // Default view, framed for the current viewport shape (compact viewports
     // pull back so the stack clears the chrome). defaultFraming returns fresh
