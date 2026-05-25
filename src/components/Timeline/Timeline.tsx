@@ -95,6 +95,8 @@ export function Timeline() {
   const setSpeed = useMissionStore((s) => s.setSpeed)
   const openPhaseId = useMissionStore((s) => s.openPhaseId)
   const setOpenPhase = useMissionStore((s) => s.setOpenPhase)
+  // Retract the timeline while a component is focused (see .wrapHidden).
+  const focused = useMissionStore((s) => s.activeComponent !== null)
 
   const { activePhase, activePhaseIndex, tplus } = useMissionState()
   const labelLayouts = computeLabelLayouts(phases)
@@ -169,7 +171,7 @@ export function Timeline() {
   }
 
   return (
-    <div className={styles.wrap}>
+    <div className={focused ? `${styles.wrap} ${styles.wrapHidden}` : styles.wrap}>
       <ZoomControls />
       <div className={styles.head}>
         <div className={styles.status}>
