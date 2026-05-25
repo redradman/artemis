@@ -1,7 +1,9 @@
 .wrap {
   position: absolute;
-  left: var(--edge-inset);
-  right: var(--edge-inset);
+  /* max() keeps the normal edge inset on most screens but pushes clear of a
+   * landscape notch / rounded corner when the safe-area inset is larger. */
+  left: max(var(--edge-inset), env(safe-area-inset-left, 0px));
+  right: max(var(--edge-inset), env(safe-area-inset-right, 0px));
   bottom: var(--timeline-bottom);
   border: var(--hairline);
   padding: 14px 22px 22px;

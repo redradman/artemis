@@ -3,7 +3,13 @@
   top: 0;
   left: 0;
   right: 0;
-  padding: var(--chrome-pad-y) var(--chrome-pad-x);
+  /* Pad past the notch (top) and any landscape side insets. env() is 0 on
+   * non-notched screens, so desktop padding is unchanged. */
+  padding:
+    calc(var(--chrome-pad-y) + env(safe-area-inset-top, 0px))
+    calc(var(--chrome-pad-x) + env(safe-area-inset-right, 0px))
+    var(--chrome-pad-y)
+    calc(var(--chrome-pad-x) + env(safe-area-inset-left, 0px));
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -246,7 +252,11 @@
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
-    padding: 12px 14px;
+    padding:
+      calc(12px + env(safe-area-inset-top, 0px))
+      calc(14px + env(safe-area-inset-right, 0px))
+      12px
+      calc(14px + env(safe-area-inset-left, 0px));
   }
 
   .name {

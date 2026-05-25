@@ -187,7 +187,8 @@
     left: 0;
     width: 100%;
     max-height: 70dvh;
-    padding: 22px 20px 24px;
+    /* Extra bottom padding so the last spec row clears the home indicator. */
+    padding: 22px 20px calc(24px + env(safe-area-inset-bottom, 0px));
     border: none;
     border-top: var(--hairline);
     overflow-y: auto;

@@ -69,7 +69,10 @@
   --chrome-pad-y: clamp(14px, 2vw, 24px);
   --edge-inset: clamp(12px, 2vw, 28px);
   --panel-inset: clamp(14px, 2vw, 28px);
-  --timeline-bottom: clamp(28px, 3.2vh, 40px);
+  /* Lift the timeline above the home indicator / gesture bar on notched
+   * devices. env() resolves to 0 where there's no inset (all desktops), so
+   * the base clamp is unchanged there. */
+  --timeline-bottom: calc(clamp(28px, 3.2vh, 40px) + env(safe-area-inset-bottom, 0px));
 
   --panel-bg: rgba(0, 0, 0, 0.55);
   --panel-border: rgba(240, 235, 224, 0.12);
