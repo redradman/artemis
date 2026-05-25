@@ -186,7 +186,10 @@
     bottom: 0;
     left: 0;
     width: 100%;
-    max-height: 70dvh;
+    /* Half-height sheet: the camera lifts the focused part into the band above
+     * this, so the highlight stays visible while the description scrolls here.
+     * Kept in sync with MOBILE_SHEET_FRAC in the scene's focus framing. */
+    max-height: 50dvh;
     /* Extra bottom padding so the last spec row clears the home indicator. */
     padding: 22px 20px calc(24px + env(safe-area-inset-bottom, 0px));
     border: none;
