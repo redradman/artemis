@@ -55,6 +55,10 @@ export function Chrome() {
   const toggleAutoRotate = useMissionStore((s) => s.toggleAutoRotate)
   const toggleLabels = useMissionStore((s) => s.toggleLabels)
   const reset = useMissionStore((s) => s.reset)
+  // Retract the header while a component is focused so its controls and brand
+  // don't collide with the zoomed-in wireframe. Closing the info panel clears
+  // activeComponent and brings the header back.
+  const focused = useMissionStore((s) => s.activeComponent !== null)
 
   // Tween the spec numbers so step-changes (SRB SEP / MECO / ICPS SEP / CM-SM
   // SEP) read as a visible count-down rather than a jump cut. HEIGHT rarely
@@ -64,7 +68,7 @@ export function Chrome() {
   const tweenedThrust = useTweenedNumber(parseThrustMN(stats.thrustDisplay))
 
   return (
-    <div className={styles.top}>
+    <div className={focused ? `${styles.top} ${styles.topHidden}` : styles.top}>
       <div className={styles.brand}>
         <div className={styles.name}>
           {mission.name}
