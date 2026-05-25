@@ -79,34 +79,31 @@ function defaultFraming(compact: boolean): {
   return { radius, target, fixedPos }
 }
 
-// Per-component focus framing. Desktop frames the part with surrounding
-// context at ~1.8× its focusRadius, centred. On compact viewports the info
-// panel is a bottom sheet covering the lower ~half of the screen, so a
-// centred part lands right behind it — invisible. There we pull back further
-// (smaller part) and drop the orbit target so the part renders in the clear
-// band above the sheet instead of dead-centre.
-const FOCUS_RADIUS_MULT = 1.8
-const FOCUS_RADIUS_MULT_COMPACT = 2.5
+// Per-component focus framing. The part is pulled back by a multiple of its
+// focusRadius and positioned at a target fraction down the viewport — both
+// chosen to leave top breathing room so the geometry above the part (the LAS
+// tower over the crew module, the top of the core tank) tapers off rather than
+// clipping flat against the viewport edge. Desktop sits the part just below
+// centre; compact pulls back further (smaller part) and lifts it into the band
+// above the info sheet, but kept low enough to keep that top margin.
+const FOCUS_RADIUS_MULT = 2.0
+const FOCUS_RADIUS_MULT_COMPACT = 3.0
 const HALF_FOV_TAN = Math.tan((28 / 2) * (Math.PI / 180))
-// Fractions of viewport height taken by the mobile info sheet (matches the
-// InfoPanel max-height) and reserved at the top for the chrome.
-const MOBILE_SHEET_FRAC = 0.5
-const MOBILE_CHROME_FRAC = 0.18
+// Fraction-from-top to place the focused part's centre.
+const FOCUS_PART_Y = 0.54
+const FOCUS_PART_Y_COMPACT = 0.4
 
 function focusFraming(
   c: RocketComponent,
   compact: boolean,
 ): { target: THREE.Vector3; radius: number } {
-  if (!compact) {
-    return { target: c.focus.clone(), radius: c.focusRadius * FOCUS_RADIUS_MULT }
-  }
-  const radius = c.focusRadius * FOCUS_RADIUS_MULT_COMPACT
-  // Target screen position for the part: the centre of the band between the
-  // top chrome and the sheet. A point Δ world-units above the orbit target
-  // projects to fraction 0.5·(1 − Δ/halfHeight) from the top, so solving for
-  // the band centre gives the downward target shift that lifts the part there.
-  const bandCenter = (MOBILE_CHROME_FRAC + (1 - MOBILE_SHEET_FRAC)) / 2
-  const drop = radius * HALF_FOV_TAN * (1 - 2 * bandCenter)
+  const radius = c.focusRadius * (compact ? FOCUS_RADIUS_MULT_COMPACT : FOCUS_RADIUS_MULT)
+  const partY = compact ? FOCUS_PART_Y_COMPACT : FOCUS_PART_Y
+  // A point Δ world-units above the orbit target projects to fraction
+  // 0.5·(1 − Δ/halfHeight) from the top. Solve for the target shift that lands
+  // the part (Δ from target) at partY: drop the target below the part when we
+  // want it above centre (compact), raise it when we want it below (desktop).
+  const drop = radius * HALF_FOV_TAN * (1 - 2 * partY)
   const target = c.focus.clone()
   target.y -= drop
   return { target, radius }
