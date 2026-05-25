@@ -1,6 +1,14 @@
 .root {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  /* Track the dynamic viewport rather than the large (inset:0) one so the
+   * bottom timeline sits inside the live viewport instead of behind iOS
+   * Safari's toolbar. Falls back to 100vh where dvh is unsupported; on
+   * desktop dvh == vh, so the layout is unchanged. */
+  height: 100vh;
+  height: 100dvh;
   background: var(--color-bg);
   color: var(--color-fg);
   font-family: var(--font-mono);

@@ -39,15 +39,45 @@ const DEFAULT_TARGET = new THREE.Vector3(0, 1.5, 0)
 // 250u puts the 73-unit-tall rocket at ~58% of viewport height so the
 // bottom timeline wrap never crops the RS-25 skirt on first load.
 const DEFAULT_RADIUS = 250
-// The exact camera pose used on page load. RESET flies back to this
-// absolute position so the ship returns to its original orientation
-// rather than just its original distance along whatever angle the
-// user last rotated to.
-const INITIAL_CAMERA_POSITION = new THREE.Vector3(146.95, 1.5, 202.25)
+// On compact viewports (narrow phones, portrait tablets) the top chrome and
+// the bottom mission timeline each eat ~21% of the height, leaving a centred
+// gap of ~56%. Pulling the camera back from 250 to 325 shrinks the 73-unit
+// stack from ~59% to ~45% of the viewport so the full rocket — nose to engine
+// bells — sits inside that gap with margin instead of being clipped behind
+// the overlays. Stays under OrbitControls' maxDistance (400).
+const COMPACT_RADIUS = 325
+
+// Page-load / RESET view direction: a level 3/4 front-right orbit. The camera
+// pose is this unit vector scaled by the active radius and added to the
+// target, so desktop (×250) reproduces the original (146.95, 1.5, 202.25)
+// pose exactly while compact just re-radiuses along the same angle.
+const VIEW_DIR = new THREE.Vector3(146.95, 0, 202.25).normalize()
 
 // World-space centre of the rocket after the group's -28y translation.
 // Matches OrbitControls target; the Projector uses this for the facing test.
 const MODEL_CENTER = new THREE.Vector3(0, 1.5, 0)
+
+// A viewport is "compact" when it's phone-narrow or taller than it is wide;
+// both shapes need the pulled-back framing so the stack isn't clipped by the
+// top chrome and bottom timeline.
+function isCompactViewport(width: number, height: number): boolean {
+  return width > 0 && (width < 768 || height > width)
+}
+
+// Default (no component focused) framing for a given viewport shape. fixedPos
+// pins the exact page-load/RESET pose; a fresh target/fixedPos is returned each
+// call so callers can hand it straight to the fly-to without aliasing shared
+// constants.
+function defaultFraming(compact: boolean): {
+  radius: number
+  target: THREE.Vector3
+  fixedPos: THREE.Vector3
+} {
+  const radius = compact ? COMPACT_RADIUS : DEFAULT_RADIUS
+  const target = DEFAULT_TARGET.clone()
+  const fixedPos = target.clone().addScaledVector(VIEW_DIR, radius)
+  return { radius, target, fixedPos }
+}
 
 // Scale-reference targets. The rocket geometry spans world y -7 → 66 (73 units)
 // representing 0 → 98.1 m. Scale = 73/98.1 = 0.744 units per metre. These
@@ -75,6 +105,8 @@ function CameraRig({
 }) {
   const activeComponent = useMissionStore((s) => s.activeComponent)
   const cameraResetNonce = useMissionStore((s) => s.cameraResetNonce)
+  const size = useThree((s) => s.size)
+  const compact = isCompactViewport(size.width, size.height)
 
   const goal = useMemo(() => {
     if (activeComponent) {
@@ -91,20 +123,22 @@ function CameraRig({
           fixedPos: undefined as THREE.Vector3 | undefined,
         }
     }
-    // Clone DEFAULT_TARGET so each memo pass produces a new reference. That
-    // way `cameraResetNonce` participating in the deps is enough to make
-    // useCameraFlyTo re-trigger on RESET even though the logical goal is
-    // identical to what it was before the user rotated. fixedPos pins the
-    // destination to the exact page-load camera pose so RESET restores the
+    // Default view, framed for the current viewport shape (compact viewports
+    // pull back so the stack clears the chrome). defaultFraming returns fresh
+    // vectors each pass, so `cameraResetNonce` in the deps is enough to make
+    // useCameraFlyTo re-trigger on RESET even when the framing is unchanged;
+    // `compact` re-frames smoothly when the device is rotated. fixedPos pins
+    // the destination to the exact page-load pose so RESET restores the
     // original orientation, not just the original distance.
+    const f = defaultFraming(compact)
     return {
-      target: DEFAULT_TARGET.clone(),
-      radius: DEFAULT_RADIUS,
+      target: f.target,
+      radius: f.radius,
       local: false,
-      fixedPos: INITIAL_CAMERA_POSITION.clone() as THREE.Vector3 | undefined,
+      fixedPos: f.fixedPos as THREE.Vector3 | undefined,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeComponent, cameraResetNonce])
+  }, [activeComponent, cameraResetNonce, compact])
 
   useCameraFlyTo(
     controlsRef,
@@ -254,6 +288,22 @@ export function ArtemisIIScene() {
   const renderMode = useMissionStore((s) => s.renderMode)
   const cinematic = renderMode === 'cinematic'
 
+  // Frame the initial camera for the current viewport so there's no load-time
+  // fly from a desktop pose to the compact one (CameraRig would otherwise
+  // animate the correction on first paint). Computed once from window size.
+  const initialCamera = useMemo(() => {
+    const compact =
+      typeof window !== 'undefined' &&
+      isCompactViewport(window.innerWidth, window.innerHeight)
+    const p = defaultFraming(compact).fixedPos
+    return {
+      fov: 28,
+      near: 0.1,
+      far: 2000,
+      position: [p.x, p.y, p.z] as [number, number, number],
+    }
+  }, [])
+
   const targets = useMemo(() => {
     const componentTargets = components.map((c) => {
       const stageOffset = state.stages[c.stage]
@@ -274,12 +324,7 @@ export function ArtemisIIScene() {
       // a reasonable ceiling: crisp on phones and retina laptops without
       // the 3× fragment cost.
       dpr={[1, 2]}
-      camera={{
-        fov: 28,
-        near: 0.1,
-        far: 2000,
-        position: [146.95, 1.5, 202.25],
-      }}
+      camera={initialCamera}
     >
       {/* Fog near plane pushed past OrbitControls maxDistance (400) so the
           rocket stays at full opacity across the entire zoom range. Kept as
